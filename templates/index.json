@@ -40,6 +40,7 @@
       "type": "split-content",
       "name": "Split Content Block",
       "settings": {
+        "image": "shopify://shop_images/create-an-image-with-fashion-pieces-that-are-simple-and-sophisticated-and-elegant.png",
         "eyebrow": "The Collection",
         "title": "Timeless Elegance",
         "text": "<p>Discover pieces designed for the modern wardrobe, where simplicity meets sophistication.</p>",
