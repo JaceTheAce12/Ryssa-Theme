@@ -1,8 +1,9 @@
 {%- comment -%}
   ----------------------------------------------------------------------------------
   RYSSA HERO SECTION
-  - Fixed: image_tag syntax error
-  - Fixed: loading attribute logic (eager/lazy)
+  - Fully integrated with your CSS.
+  - Supports separate Desktop/Mobile images and videos.
+  - Fixed syntax errors from previous version.
   ----------------------------------------------------------------------------------
 {%- endcomment -%}
 
@@ -20,7 +21,7 @@
   assign desktop_media_type = section.settings.desktop_media_type
   assign mobile_media_type = section.settings.mobile_media_type
   
-  # Check if we really have mobile media to show
+  # Check if mobile media exists
   assign has_mobile_media = false
   if mobile_media_type == 'image' and section.settings.image_mobile != blank
     assign has_mobile_media = true
@@ -33,24 +34,21 @@
   
   <div class="hero__background parallax-element">
     
-    {%- comment -%} 
-      1. VIDEO HANDLING 
-    {%- endcomment -%}
+    {%- comment -%} 1. VIDEO PLAYERS {%- endcomment -%}
+    
     {%- if desktop_media_type == 'video' and section.settings.video_desktop != blank -%}
-      <div class="hero-video-container {% if has_mobile_media %}desktop-only{% endif %}">
-        {{ section.settings.video_desktop | video_tag: autoplay: true, loop: true, muted: true, controls: false, class: 'hero-video', image_size: '1920x' }}
+      <div class="hero-media-container desktop-only">
+        {{ section.settings.video_desktop | video_tag: autoplay: true, loop: true, muted: true, controls: false, class: 'hero__media-item', image_size: '1920x' }}
       </div>
     {%- endif -%}
 
     {%- if has_mobile_media and mobile_media_type == 'video' -%}
-      <div class="hero-video-container mobile-only">
-        {{ section.settings.video_mobile | video_tag: autoplay: true, loop: true, muted: true, controls: false, class: 'hero-video', image_size: '800x' }}
+      <div class="hero-media-container mobile-only">
+        {{ section.settings.video_mobile | video_tag: autoplay: true, loop: true, muted: true, controls: false, class: 'hero__media-item', image_size: '800x' }}
       </div>
     {%- endif -%}
 
-    {%- comment -%} 
-      2. IMAGE HANDLING (Picture Tag)
-    {%- endcomment -%}
+    {%- comment -%} 2. IMAGES (Picture Tag) {%- endcomment -%}
     
     {%- if desktop_media_type == 'image' or has_mobile_media -%}
       {%- unless desktop_media_type == 'video' and mobile_media_type == 'video' -%}
@@ -65,7 +63,7 @@
             >
           {%- endif -%}
 
-          {%- comment -%} Desktop Source (Only if desktop is image) {%- endcomment -%}
+          {%- comment -%} Desktop Source {%- endcomment -%}
           {%- if desktop_media_type == 'image' and section.settings.image_desktop != blank -%}
              <source 
               media="(min-width: 768px)" 
@@ -76,7 +74,6 @@
             >
             {%- assign main_image = section.settings.image_desktop -%}
           {%- elsif has_mobile_media and mobile_media_type == 'image' -%}
-            {%- comment -%} Fallback if only mobile image exists {%- endcomment -%}
             {%- assign main_image = section.settings.image_mobile -%}
           {%- else -%}
              {%- assign main_image = blank -%}
@@ -87,11 +84,11 @@
               loading: loading_attr,
               fetchpriority: fetch_priority_attr,
               alt: main_image.alt,
-              class: 'hero-img'
+              class: 'hero__media-item'
             }}
           {%- else -%}
             {%- if desktop_media_type == 'image' -%}
-              {{ 'lifestyle-1' | placeholder_svg_tag: 'hero-img placeholder-svg' }}
+              {{ 'lifestyle-1' | placeholder_svg_tag: 'hero__media-item placeholder-svg' }}
             {%- endif -%}
           {%- endif -%}
         </picture>
@@ -125,39 +122,6 @@
     {%- endif -%}
   </div>
 </section>
-
-<style>
-  /* Local overrides */
-  .hero-img, .hero-video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    position: absolute;
-    top: 0;
-    left: 0;
-  }
-  
-  .hero-video-container {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-  }
-
-  .desktop-only { display: block; }
-  .mobile-only { display: none; }
-
-  @media screen and (max-width: 767px) {
-    .desktop-only { display: none; }
-    .mobile-only { display: block; }
-    
-    .hero-video-container.mobile-only {
-      display: block;
-      height: 100%;
-    }
-  }
-</style>
 
 {% schema %}
 {
@@ -282,3 +246,169 @@
   ]
 }
 {% endschema %}
+
+{% stylesheet %}
+  /* ========================================
+     HELPER CLASSES (For Liquid Logic)
+     ======================================== */
+  .desktop-only { display: block; }
+  .mobile-only { display: none; }
+  
+  .hero-media-container {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+  }
+  
+  .hero__media-item {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0; left: 0;
+  }
+
+  @media screen and (max-width: 767px) {
+    .desktop-only { display: none; }
+    .mobile-only { display: block; }
+  }
+
+
+  /* ========================================
+     YOUR PROVIDED CSS
+     ======================================== */
+  .hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 600px;
+    height: 100vh;
+    max-height: 900px;
+    overflow: hidden;
+  }
+
+  .hero__background {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+  }
+
+  /* Note: .hero__background img targeted by hero__media-item above */
+
+  .hero__overlay {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(233, 245, 255, 0.08) 0%,
+      rgba(0, 0, 0, 0.3) 100%
+    );
+  }
+
+  .hero__accent-line {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      var(--color-primary) 30%,
+      var(--color-primary-hover) 50%,
+      var(--color-primary) 70%,
+      transparent 100%
+    );
+    z-index: 3;
+    opacity: 0.7;
+  }
+
+  .hero__content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    color: var(--color-white);
+    padding: var(--spacing-md);
+    max-width: 800px;
+  }
+
+  .hero__eyebrow {
+    display: block;
+    font-size: 14px;
+    font-weight: var(--font-semibold);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wider);
+    margin-bottom: var(--spacing-sm);
+    opacity: 0.9;
+  }
+
+  .hero__headline {
+    font-size: clamp(48px, 8vw, 96px);
+    font-weight: var(--font-light);
+    letter-spacing: var(--tracking-tight);
+    text-transform: uppercase;
+    margin-bottom: var(--spacing-sm);
+    color: var(--color-white);
+  }
+
+  .hero__subheadline {
+    font-size: var(--text-xl);
+    font-weight: var(--font-light);
+    letter-spacing: var(--tracking-wide);
+    margin-bottom: var(--spacing-lg);
+    opacity: 0.95;
+  }
+
+  .hero__cta {
+    margin-top: var(--spacing-lg);
+  }
+
+
+  /* ========================================
+     BUTTONS
+     ======================================== */
+
+  .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 40px;
+    font-size: 14px;
+    font-weight: var(--font-medium);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all var(--duration-base) var(--ease-smooth);
+    min-width: 200px;
+  }
+
+  .button--primary {
+    background-color: var(--color-black);
+    color: var(--color-white);
+    border-color: var(--color-black);
+  }
+
+  .button--primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .button--primary:focus-visible {
+    outline: 2px solid var(--color-primary-dark);
+    outline-offset: 3px;
+  }
+
+  .button--primary:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-sm);
+  }
+{% endstylesheet %}
