@@ -56,6 +56,7 @@
       "type": "split-content",
       "name": "Split Content (Reverse)",
       "settings": {
+        "image": "shopify://shop_images/create-an-image-with-fashion-pieces-and-a-wardrobe-that-are-artisanal.png",
         "eyebrow": "The Collection",
         "title": "Artisanal Quality",
         "text": "<p>Discover pieces designed for the modern wardrobe, where simplicity meets sophistication.</p>",
