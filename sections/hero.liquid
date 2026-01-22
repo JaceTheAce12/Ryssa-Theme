@@ -1,9 +1,7 @@
 {%- comment -%}
   ----------------------------------------------------------------------------------
   RYSSA HERO SECTION
-  - Fully integrated with your CSS.
-  - Supports separate Desktop/Mobile images and videos.
-  - Fixed syntax errors from previous version.
+  - Includes: HTML/Liquid, CSS, and Optimized Hero-Specific JS
   ----------------------------------------------------------------------------------
 {%- endcomment -%}
 
@@ -249,7 +247,7 @@
 
 {% stylesheet %}
   /* ========================================
-     HELPER CLASSES (For Liquid Logic)
+     HELPER CLASSES 
      ======================================== */
   .desktop-only { display: block; }
   .mobile-only { display: none; }
@@ -274,9 +272,8 @@
     .mobile-only { display: block; }
   }
 
-
   /* ========================================
-     YOUR PROVIDED CSS
+     MAIN HERO CSS
      ======================================== */
   .hero {
     position: relative;
@@ -297,8 +294,6 @@
     left: 0;
     z-index: 1;
   }
-
-  /* Note: .hero__background img targeted by hero__media-item above */
 
   .hero__overlay {
     position: absolute;
@@ -371,11 +366,7 @@
     margin-top: var(--spacing-lg);
   }
 
-
-  /* ========================================
-     BUTTONS
-     ======================================== */
-
+  /* BUTTONS */
   .button {
     display: inline-flex;
     align-items: center;
@@ -412,3 +403,156 @@
     box-shadow: var(--shadow-sm);
   }
 {% endstylesheet %}
+
+<script>
+(function() {
+  'use strict';
+
+  // Helper: Debounce
+  function debounce(func, wait = 250) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
+
+  /* ========================================
+     FADE IN ANIMATIONS
+     ======================================== */
+  class FadeInObserver {
+    constructor() {
+      // Limit to this section to avoid conflicts if used elsewhere
+      this.elements = document.querySelectorAll('.hero .fade-in'); 
+      this.options = { threshold: 0.1, rootMargin: '-50px' };
+      this.init();
+    }
+
+    init() {
+      if (!('IntersectionObserver' in window)) {
+        this.elements.forEach(el => el.classList.add('visible'));
+        return;
+      }
+
+      this.observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+             // Immediate add for hero to prevent delay on load
+            entry.target.classList.add('visible');
+            this.observer.unobserve(entry.target);
+          }
+        });
+      }, this.options);
+
+      this.elements.forEach(el => this.observer.observe(el));
+    }
+  }
+
+  /* ========================================
+     PARALLAX EFFECT
+     ======================================== */
+  class ParallaxEffect {
+    constructor() {
+      this.elements = document.querySelectorAll('.parallax-element');
+      this.ticking = false;
+      this.speed = 0.3; 
+      this.init();
+    }
+
+    init() {
+      if (this.elements.length === 0) return;
+      
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReducedMotion) return;
+
+      window.addEventListener('scroll', () => {
+        if (!this.ticking) {
+          window.requestAnimationFrame(() => {
+            this.updateParallax();
+            this.ticking = false;
+          });
+          this.ticking = true;
+        }
+      }, { passive: true });
+    }
+
+    updateParallax() {
+      const scrollY = window.scrollY;
+      this.elements.forEach(element => {
+        const rect = element.getBoundingClientRect();
+        const elementTop = rect.top + scrollY;
+        const elementHeight = element.offsetHeight;
+        const viewportHeight = window.innerHeight;
+
+        if (scrollY + viewportHeight > elementTop && scrollY < elementTop + elementHeight) {
+          const yPos = (scrollY - elementTop) * this.speed;
+          element.style.transform = `translateY(${yPos}px)`;
+        }
+      });
+    }
+  }
+
+  /* ========================================
+     LAZY LOAD FALLBACK
+     ======================================== */
+  class LazyLoadImages {
+    constructor() {
+      this.images = document.querySelectorAll('.hero img[loading="lazy"]');
+      this.init();
+    }
+
+    init() {
+      if ('loading' in HTMLImageElement.prototype) return;
+
+      if (!('IntersectionObserver' in window)) {
+        this.images.forEach(img => this.loadImage(img));
+        return;
+      }
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            this.loadImage(entry.target);
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { rootMargin: '50px' });
+
+      this.images.forEach(img => observer.observe(img));
+    }
+
+    loadImage(img) {
+      if (img.dataset.src) {
+        img.src = img.dataset.src;
+        img.removeAttribute('data-src');
+      }
+    }
+  }
+
+  // Initialize Modules
+  function init() {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeModules);
+    } else {
+      initializeModules();
+    }
+  }
+
+  function initializeModules() {
+    new FadeInObserver();
+    new ParallaxEffect();
+    new LazyLoadImages();
+  }
+
+  init();
+
+  window.addEventListener('resize', debounce(() => {
+    // Parallax recalcs handled automatically by scroll loop
+  }, 250));
+
+})();
+</script>
