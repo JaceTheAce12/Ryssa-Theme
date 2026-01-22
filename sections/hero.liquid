@@ -1,7 +1,9 @@
 {%- comment -%}
   ----------------------------------------------------------------------------------
-  RYSSA HERO SECTION
-  - Includes: HTML/Liquid, CSS, and Optimized Hero-Specific JS
+  RYSSA HERO SECTION - MAGAZINE COVER STYLE
+  - Features: Grain Texture, Issue Badge, Decorative Letter, Scroll Indicator
+  - Supports: Desktop/Mobile Images & Videos
+  - Content: HTML-enabled headline for editorial styling
   ----------------------------------------------------------------------------------
 {%- endcomment -%}
 
@@ -19,7 +21,6 @@
   assign desktop_media_type = section.settings.desktop_media_type
   assign mobile_media_type = section.settings.mobile_media_type
   
-  # Check if mobile media exists
   assign has_mobile_media = false
   if mobile_media_type == 'image' and section.settings.image_mobile != blank
     assign has_mobile_media = true
@@ -33,7 +34,6 @@
   <div class="hero__background parallax-element">
     
     {%- comment -%} 1. VIDEO PLAYERS {%- endcomment -%}
-    
     {%- if desktop_media_type == 'video' and section.settings.video_desktop != blank -%}
       <div class="hero-media-container desktop-only">
         {{ section.settings.video_desktop | video_tag: autoplay: true, loop: true, muted: true, controls: false, class: 'hero__media-item', image_size: '1920x' }}
@@ -47,11 +47,9 @@
     {%- endif -%}
 
     {%- comment -%} 2. IMAGES (Picture Tag) {%- endcomment -%}
-    
     {%- if desktop_media_type == 'image' or has_mobile_media -%}
       {%- unless desktop_media_type == 'video' and mobile_media_type == 'video' -%}
         <picture>
-          {%- comment -%} Mobile Source {%- endcomment -%}
           {%- if has_mobile_media and mobile_media_type == 'image' -%}
             <source 
               media="(max-width: 767px)" 
@@ -61,7 +59,6 @@
             >
           {%- endif -%}
 
-          {%- comment -%} Desktop Source {%- endcomment -%}
           {%- if desktop_media_type == 'image' and section.settings.image_desktop != blank -%}
              <source 
               media="(min-width: 768px)" 
@@ -93,18 +90,23 @@
       {%- endunless -%}
     {%- endif -%}
 
-    <div class="hero__overlay" style="background-color: {{ section.settings.overlay_color }}; opacity: {{ section.settings.overlay_opacity | divided_by: 100.0 }}"></div>
+    <div class="hero__overlay"></div>
     
-    {%- if section.settings.show_accent_line -%}
-      <div class="hero__accent-line"></div>
-    {%- endif -%}
+    <div class="hero__grain-texture"></div>
   </div>
 
+  {%- if section.settings.issue_number != blank -%}
+    <div class="hero__issue-badge">
+      <span class="hero__issue-number">{{ section.settings.issue_number }}</span>
+      <span class="hero__issue-season">{{ section.settings.issue_season }}</span>
+    </div>
+  {%- endif -%}
+
+  {%- if section.settings.decorative_letter != blank -%}
+    <div class="hero__decorative-letter" aria-hidden="true">{{ section.settings.decorative_letter }}</div>
+  {%- endif -%}
+
   <div class="hero__content fade-in">
-    {%- if section.settings.eyebrow != blank -%}
-      <span class="hero__eyebrow">{{ section.settings.eyebrow }}</span>
-    {%- endif -%}
-    
     {%- if section.settings.title != blank -%}
       <h1 class="hero__headline">{{ section.settings.title }}</h1>
     {%- endif -%}
@@ -119,12 +121,42 @@
       </a>
     {%- endif -%}
   </div>
+
+  <div class="hero__scroll-indicator">
+    <span>Scroll to Explore</span>
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M12 5V19M12 19L6 13M12 19L18 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+
 </section>
 
 {% schema %}
 {
-  "name": "Ryssa Hero",
+  "name": "Ryssa Hero (Magazine)",
   "settings": [
+    {
+      "type": "header",
+      "content": "Magazine Elements"
+    },
+    {
+      "type": "text",
+      "id": "issue_number",
+      "label": "Issue Number",
+      "default": "Issue 01"
+    },
+    {
+      "type": "text",
+      "id": "issue_season",
+      "label": "Season",
+      "default": "Spring 2026"
+    },
+    {
+      "type": "text",
+      "id": "decorative_letter",
+      "label": "Decorative Letter",
+      "default": "R"
+    },
     {
       "type": "header",
       "content": "Desktop Media"
@@ -154,10 +186,6 @@
       "content": "Mobile Media (Optional)"
     },
     {
-      "type": "paragraph",
-      "content": "If left blank, desktop media will be used."
-    },
-    {
       "type": "select",
       "id": "mobile_media_type",
       "label": "Mobile Media Type",
@@ -179,45 +207,14 @@
     },
     {
       "type": "header",
-      "content": "Overlay & Design"
-    },
-    {
-      "type": "color",
-      "id": "overlay_color",
-      "label": "Overlay Color",
-      "default": "#000000"
-    },
-    {
-      "type": "range",
-      "id": "overlay_opacity",
-      "min": 0,
-      "max": 90,
-      "step": 5,
-      "unit": "%",
-      "label": "Overlay Opacity",
-      "default": 30
-    },
-    {
-      "type": "checkbox",
-      "id": "show_accent_line",
-      "label": "Show Bottom Accent Line",
-      "default": true
-    },
-    {
-      "type": "header",
       "content": "Content"
     },
     {
-      "type": "text",
-      "id": "eyebrow",
-      "label": "Eyebrow Text",
-      "default": "Spring 2026"
-    },
-    {
-      "type": "text",
+      "type": "html",
       "id": "title",
-      "label": "Headline",
-      "default": "Ethereal Minimalism"
+      "label": "Headline (HTML allowed)",
+      "default": "Ethereal<br><em>Minimalism</em>",
+      "info": "Use <br> for line breaks and <em> for italics."
     },
     {
       "type": "textarea",
@@ -239,7 +236,7 @@
   ],
   "presets": [
     {
-      "name": "Ryssa Hero"
+      "name": "Ryssa Hero (Magazine)"
     }
   ]
 }
@@ -247,7 +244,7 @@
 
 {% stylesheet %}
   /* ========================================
-     HELPER CLASSES 
+     HELPER CLASSES (Liquid Logic)
      ======================================== */
   .desktop-only { display: block; }
   .mobile-only { display: none; }
@@ -273,17 +270,31 @@
   }
 
   /* ========================================
-     MAIN HERO CSS
+     HERO SECTION - MAGAZINE COVER CSS
      ======================================== */
+
   .hero {
+    /* Define local variables based on provided CSS logic if needed, 
+       otherwise assumes global vars exist. Defaults added for safety. */
+    --color-white: #FFFFFF;
+    --color-black: #1A1A1A;
+    --color-gold: #8B7355; 
+    --spacing-xs: 8px;
+    --spacing-md: 24px;
+    --spacing-lg: 32px;
+    --spacing-xl: 48px;
+    --spacing-2xl: 80px;
+    --spacing-3xl: 120px;
+    
     position: relative;
     display: flex;
     align-items: center;
-    justify-content: center;
-    min-height: 600px;
+    justify-content: flex-start;
+    min-height: 700px;
     height: 100vh;
-    max-height: 900px;
+    max-height: 1000px;
     overflow: hidden;
+    padding: 0 var(--spacing-2xl);
   }
 
   .hero__background {
@@ -302,83 +313,166 @@
     bottom: 0;
     left: 0;
     background: linear-gradient(
-      180deg,
-      rgba(233, 245, 255, 0.08) 0%,
+      135deg,
+      rgba(0, 0, 0, 0.4) 0%,
+      rgba(0, 0, 0, 0.1) 50%,
       rgba(0, 0, 0, 0.3) 100%
     );
-  }
-
-  .hero__accent-line {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      var(--color-primary) 30%,
-      var(--color-primary-hover) 50%,
-      var(--color-primary) 70%,
-      transparent 100%
-    );
-    z-index: 3;
-    opacity: 0.7;
-  }
-
-  .hero__content {
-    position: relative;
     z-index: 2;
-    text-align: center;
-    color: var(--color-white);
-    padding: var(--spacing-md);
-    max-width: 800px;
+    pointer-events: none;
   }
 
-  .hero__eyebrow {
-    display: block;
-    font-size: 14px;
-    font-weight: var(--font-semibold);
+  /* Paper Grain Texture */
+  .hero__grain-texture {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='2' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.02'/%3E%3C/svg%3E");
+    z-index: 3;
+    pointer-events: none;
+    mix-blend-mode: overlay;
+  }
+
+  /* Issue Badge - Magazine Style */
+  .hero__issue-badge {
+    position: absolute;
+    top: var(--spacing-xl);
+    right: var(--spacing-xl);
+    z-index: 10;
+    text-align: right;
+    color: var(--color-white);
+    font-family: var(--font-body);
     text-transform: uppercase;
-    letter-spacing: var(--tracking-wider);
-    margin-bottom: var(--spacing-sm);
+    letter-spacing: 0.15em;
+  }
+
+  .hero__issue-number {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 4px;
     opacity: 0.9;
   }
 
-  .hero__headline {
-    font-size: clamp(48px, 8vw, 96px);
-    font-weight: var(--font-light);
-    letter-spacing: var(--tracking-tight);
-    text-transform: uppercase;
-    margin-bottom: var(--spacing-sm);
+  .hero__issue-season {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    border-top: 2px solid var(--color-gold);
+    padding-top: 8px;
+  }
+
+  /* Decorative Letter */
+  .hero__decorative-letter {
+    position: absolute;
+    top: 50%;
+    right: 5%;
+    transform: translateY(-50%);
+    font-family: var(--font-display);
+    font-size: clamp(15rem, 25vw, 25rem);
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.05);
+    z-index: 2;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* Magazine-style Content - Asymmetrical Left Placement */
+  .hero__content {
+    position: relative;
+    z-index: 10;
+    text-align: left;
     color: var(--color-white);
+    padding: var(--spacing-md);
+    max-width: 700px;
+    margin-left: clamp(var(--spacing-md), 5vw, var(--spacing-3xl));
+  }
+
+  .hero__headline {
+    font-family: var(--font-display);
+    font-size: clamp(3.5rem, 8vw, 7.5rem);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    line-height: 0.95;
+    margin-bottom: var(--spacing-lg);
+    color: var(--color-white);
+    text-transform: none;
+  }
+
+  .hero__headline em {
+    display: block;
+    font-family: var(--font-editorial, 'Playfair Display', serif);
+    font-style: italic;
+    font-weight: 400;
+    margin-top: 0.1em;
   }
 
   .hero__subheadline {
-    font-size: var(--text-xl);
-    font-weight: var(--font-light);
-    letter-spacing: var(--tracking-wide);
-    margin-bottom: var(--spacing-lg);
+    font-family: var(--font-editorial, 'Playfair Display', serif);
+    font-style: italic;
+    font-size: clamp(1.25rem, 2vw, 2rem);
+    font-weight: 400;
+    letter-spacing: 0.03em;
+    line-height: 1.4;
+    margin-bottom: var(--spacing-xl);
     opacity: 0.95;
+    max-width: 500px;
   }
 
   .hero__cta {
     margin-top: var(--spacing-lg);
   }
 
-  /* BUTTONS */
+  /* Elegant Scroll Indicator */
+  .hero__scroll-indicator {
+    position: absolute;
+    bottom: var(--spacing-xl);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+    color: var(--color-white);
+    font-family: var(--font-body);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-weight: 500;
+    opacity: 0.8;
+    animation: scrollBounce 2s ease-in-out infinite;
+  }
+
+  .hero__scroll-indicator svg {
+    opacity: 0.6;
+  }
+
+  @keyframes scrollBounce {
+    0%, 100% {
+      transform: translateX(-50%) translateY(0);
+    }
+    50% {
+      transform: translateX(-50%) translateY(10px);
+    }
+  }
+
+  /* BUTTONS (Scoped) */
   .button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     padding: 16px 40px;
     font-size: 14px;
-    font-weight: var(--font-medium);
+    font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: var(--tracking-wide);
+    letter-spacing: 0.1em;
     border: 1px solid transparent;
     cursor: pointer;
-    transition: all var(--duration-base) var(--ease-smooth);
+    transition: all 0.3s ease;
     min-width: 200px;
   }
 
@@ -389,170 +483,8 @@
   }
 
   .button--primary:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-  }
-
-  .button--primary:focus-visible {
-    outline: 2px solid var(--color-primary-dark);
-    outline-offset: 3px;
-  }
-
-  .button--primary:active {
-    transform: translateY(0);
-    box-shadow: var(--shadow-sm);
+    background-color: transparent;
+    color: var(--color-white);
+    border-color: var(--color-white);
   }
 {% endstylesheet %}
-
-<script>
-(function() {
-  'use strict';
-
-  // Helper: Debounce
-  function debounce(func, wait = 250) {
-    let timeout;
-    return function executedFunction(...args) {
-      const later = () => {
-        clearTimeout(timeout);
-        func(...args);
-      };
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
-    };
-  }
-
-  /* ========================================
-     FADE IN ANIMATIONS
-     ======================================== */
-  class FadeInObserver {
-    constructor() {
-      // Limit to this section to avoid conflicts if used elsewhere
-      this.elements = document.querySelectorAll('.hero .fade-in'); 
-      this.options = { threshold: 0.1, rootMargin: '-50px' };
-      this.init();
-    }
-
-    init() {
-      if (!('IntersectionObserver' in window)) {
-        this.elements.forEach(el => el.classList.add('visible'));
-        return;
-      }
-
-      this.observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-             // Immediate add for hero to prevent delay on load
-            entry.target.classList.add('visible');
-            this.observer.unobserve(entry.target);
-          }
-        });
-      }, this.options);
-
-      this.elements.forEach(el => this.observer.observe(el));
-    }
-  }
-
-  /* ========================================
-     PARALLAX EFFECT
-     ======================================== */
-  class ParallaxEffect {
-    constructor() {
-      this.elements = document.querySelectorAll('.parallax-element');
-      this.ticking = false;
-      this.speed = 0.3; 
-      this.init();
-    }
-
-    init() {
-      if (this.elements.length === 0) return;
-      
-      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (prefersReducedMotion) return;
-
-      window.addEventListener('scroll', () => {
-        if (!this.ticking) {
-          window.requestAnimationFrame(() => {
-            this.updateParallax();
-            this.ticking = false;
-          });
-          this.ticking = true;
-        }
-      }, { passive: true });
-    }
-
-    updateParallax() {
-      const scrollY = window.scrollY;
-      this.elements.forEach(element => {
-        const rect = element.getBoundingClientRect();
-        const elementTop = rect.top + scrollY;
-        const elementHeight = element.offsetHeight;
-        const viewportHeight = window.innerHeight;
-
-        if (scrollY + viewportHeight > elementTop && scrollY < elementTop + elementHeight) {
-          const yPos = (scrollY - elementTop) * this.speed;
-          element.style.transform = `translateY(${yPos}px)`;
-        }
-      });
-    }
-  }
-
-  /* ========================================
-     LAZY LOAD FALLBACK
-     ======================================== */
-  class LazyLoadImages {
-    constructor() {
-      this.images = document.querySelectorAll('.hero img[loading="lazy"]');
-      this.init();
-    }
-
-    init() {
-      if ('loading' in HTMLImageElement.prototype) return;
-
-      if (!('IntersectionObserver' in window)) {
-        this.images.forEach(img => this.loadImage(img));
-        return;
-      }
-
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            this.loadImage(entry.target);
-            observer.unobserve(entry.target);
-          }
-        });
-      }, { rootMargin: '50px' });
-
-      this.images.forEach(img => observer.observe(img));
-    }
-
-    loadImage(img) {
-      if (img.dataset.src) {
-        img.src = img.dataset.src;
-        img.removeAttribute('data-src');
-      }
-    }
-  }
-
-  // Initialize Modules
-  function init() {
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initializeModules);
-    } else {
-      initializeModules();
-    }
-  }
-
-  function initializeModules() {
-    new FadeInObserver();
-    new ParallaxEffect();
-    new LazyLoadImages();
-  }
-
-  init();
-
-  window.addEventListener('resize', debounce(() => {
-    // Parallax recalcs handled automatically by scroll loop
-  }, 250));
-
-})();
-</script>
