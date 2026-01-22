@@ -1,6 +1,7 @@
 {%- comment -%}
   ----------------------------------------------------------------------------------
   RYSSA HEADER - Custom Implementation
+  Includes: HTML Structure, Schema Settings, CSS Design System, and Interactivity JS
   ----------------------------------------------------------------------------------
 {%- endcomment -%}
 
@@ -52,12 +53,12 @@
     <div class="site-header__actions">
       
       {%- if section.settings.show_search -%}
-        <button class="site-header__action-btn" aria-label="Search">
+        <a href="{{ routes.search_url }}" class="site-header__action-btn" aria-label="Search">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor">
             <circle cx="9" cy="9" r="6" stroke-width="1.5"/>
             <path d="M13.5 13.5L17 17" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
-        </button>
+        </a>
       {%- endif -%}
 
       {%- if shop.customer_accounts_enabled -%}
@@ -639,55 +640,482 @@
 {% endstylesheet %}
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  
-  // ----------------------------------------------------
-  // 1. Mobile Menu Toggle
-  // ----------------------------------------------------
-  const toggleBtn = document.querySelector('.site-header__menu-toggle');
-  const navOverlay = document.querySelector('.mobile-nav-overlay');
-  
-  if (toggleBtn && navOverlay) {
-    toggleBtn.addEventListener('click', function() {
-      // Toggle ARIA state
-      const isExpanded = toggleBtn.getAttribute('aria-expanded') === 'true';
-      toggleBtn.setAttribute('aria-expanded', !isExpanded);
-      
-      // Toggle visibility class matching your CSS
-      navOverlay.classList.toggle('active');
-      
-      // Prevent background scrolling when menu is open
-      document.body.style.overflow = !isExpanded ? 'hidden' : '';
-    });
+/**
+ * Magazine-Style Fashion Landing Page
+ * Main JavaScript - Vanilla JS Implementation
+ */
+
+(function() {
+  'use strict';
+
+  /* ========================================
+     HEADER SCROLL BEHAVIOR
+     Hide on scroll down, show on scroll up
+     ======================================== */
+
+  class HeaderScroll {
+    constructor() {
+      this.header = document.querySelector('.site-header');
+      this.lastScrollY = window.scrollY;
+      this.ticking = false;
+
+      if (this.header) {
+        this.init();
+      }
+    }
+
+    init() {
+      window.addEventListener('scroll', () => {
+        if (!this.ticking) {
+          window.requestAnimationFrame(() => {
+            this.handleScroll();
+            this.ticking = false;
+          });
+          this.ticking = true;
+        }
+      }, { passive: true });
+    }
+
+    handleScroll() {
+      if (!this.header) return;
+
+      const currentScrollY = window.scrollY;
+
+      // Hide header when scrolling down, show when scrolling up
+      if (currentScrollY > this.lastScrollY && currentScrollY > 100) {
+        this.header.classList.add('site-header--hidden');
+      } else {
+        this.header.classList.remove('site-header--hidden');
+      }
+
+      this.lastScrollY = currentScrollY;
+    }
   }
 
-  // ----------------------------------------------------
-  // 2. Sticky Header Scroll Behavior
-  // Matches CSS class: .site-header--hidden
-  // ----------------------------------------------------
-  let lastScrollTop = 0;
-  const header = document.getElementById('SiteHeader');
-  const scrollThreshold = 100; // Only hide after scrolling down this much
 
-  window.addEventListener('scroll', function() {
-    let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    
-    // Prevent negative scrolling (safari bounce)
-    if (scrollTop <= 0) {
-      header.classList.remove('site-header--hidden');
-      return;
+  /* ========================================
+     MOBILE MENU TOGGLE
+     ======================================== */
+
+  class MobileMenu {
+    constructor() {
+      this.toggle = document.querySelector('.site-header__menu-toggle');
+      this.overlay = document.querySelector('.mobile-nav-overlay');
+      this.body = document.body;
+      this.scrollbarWidth = 0;
+      this.isOpen = false;
+
+      if (this.toggle && this.overlay) {
+        this.scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+        this.init();
+      }
     }
 
-    // Determine direction
-    if (scrollTop > lastScrollTop && scrollTop > scrollThreshold) {
-      // Scrolling DOWN
-      header.classList.add('site-header--hidden');
+    init() {
+      this.toggle.addEventListener('click', () => this.toggleMenu());
+
+      // Close menu when clicking on links
+      const menuLinks = this.overlay.querySelectorAll('a');
+      menuLinks.forEach(link => {
+        link.addEventListener('click', () => this.closeMenu());
+      });
+
+      // Close menu on escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && this.isOpen) {
+          this.closeMenu();
+          this.toggle.focus();
+        }
+      });
+    }
+
+    toggleMenu() {
+      if (this.isOpen) {
+        this.closeMenu();
+      } else {
+        this.openMenu();
+      }
+    }
+
+    openMenu() {
+      this.overlay.classList.add('active');
+      this.overlay.setAttribute('aria-hidden', 'false');
+      this.toggle.setAttribute('aria-expanded', 'true');
+      this.toggle.setAttribute('aria-label', 'Close menu');
+      this.body.style.overflow = 'hidden';
+      this.body.style.paddingRight = `${this.scrollbarWidth}px`;
+      this.isOpen = true;
+
+      // Focus first menu item
+      const firstLink = this.overlay.querySelector('a');
+      if (firstLink) {
+        firstLink.focus();
+      }
+    }
+
+    closeMenu() {
+      this.overlay.classList.remove('active');
+      this.overlay.setAttribute('aria-hidden', 'true');
+      this.toggle.setAttribute('aria-expanded', 'false');
+      this.toggle.setAttribute('aria-label', 'Open menu');
+      this.body.style.overflow = '';
+      this.body.style.paddingRight = '';
+      this.isOpen = false;
+    }
+  }
+
+
+  /* ========================================
+     INTERSECTION OBSERVER - FADE IN ANIMATIONS
+     ======================================== */
+
+  class FadeInObserver {
+    constructor() {
+      this.elements = document.querySelectorAll('.fade-in');
+      this.options = {
+        threshold: 0.1,
+        rootMargin: '-50px'
+      };
+
+      this.init();
+    }
+
+    init() {
+      if (!('IntersectionObserver' in window)) {
+        // Fallback for browsers without IntersectionObserver
+        this.elements.forEach(el => el.classList.add('visible'));
+        return;
+      }
+
+      this.observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            // Add staggered delay for multiple elements in same container
+            const delay = this.getStaggerDelay(entry.target);
+            setTimeout(() => {
+              entry.target.classList.add('visible');
+            }, delay);
+            // Optional: unobserve after animation
+            // this.observer.unobserve(entry.target);
+          }
+        });
+      }, this.options);
+
+      this.elements.forEach(el => this.observer.observe(el));
+    }
+
+    getStaggerDelay(element) {
+      // Check if element is a product card
+      if (element.classList.contains('product-card')) {
+        const parent = element.closest('.product-grid__items');
+        if (parent) {
+          const cards = Array.from(parent.querySelectorAll('.product-card'));
+          const index = cards.indexOf(element);
+          // 50ms delay per card for subtle stagger effect
+          return index * 50;
+        }
+      }
+      return 0;
+    }
+  }
+
+
+  /* ========================================
+     PARALLAX EFFECT
+     Subtle background movement on scroll
+     ======================================== */
+
+  class ParallaxEffect {
+    constructor() {
+      this.elements = document.querySelectorAll('.parallax-element');
+      this.ticking = false;
+      this.speed = 0.3; // Adjust for more/less parallax effect
+
+      this.init();
+    }
+
+    init() {
+      if (this.elements.length === 0) return;
+
+      // Check for reduced motion preference
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReducedMotion) return;
+
+      window.addEventListener('scroll', () => {
+        if (!this.ticking) {
+          window.requestAnimationFrame(() => {
+            this.updateParallax();
+            this.ticking = false;
+          });
+          this.ticking = true;
+        }
+      }, { passive: true });
+    }
+
+    updateParallax() {
+      const scrollY = window.scrollY;
+
+      this.elements.forEach(element => {
+        const rect = element.getBoundingClientRect();
+        const elementTop = rect.top + scrollY;
+        const elementHeight = element.offsetHeight;
+        const viewportHeight = window.innerHeight;
+
+        // Only apply parallax if element is in or near viewport
+        if (scrollY + viewportHeight > elementTop && scrollY < elementTop + elementHeight) {
+          const yPos = (scrollY - elementTop) * this.speed;
+          element.style.transform = `translateY(${yPos}px)`;
+        }
+      });
+    }
+  }
+
+
+  /* ========================================
+     SMOOTH SCROLL FOR ANCHOR LINKS
+     ======================================== */
+
+  class SmoothScroll {
+    constructor() {
+      this.header = document.querySelector('.site-header');
+      this.init();
+    }
+
+    init() {
+      // Check for reduced motion preference
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReducedMotion) return;
+
+      const links = document.querySelectorAll('a[href^="#"]');
+
+      links.forEach(link => {
+        link.addEventListener('click', (e) => {
+          const href = link.getAttribute('href');
+
+          // Ignore empty hash
+          if (href === '#') return;
+
+          const target = document.querySelector(href);
+
+          if (target) {
+            e.preventDefault();
+
+            const headerHeight = this.header ? this.header.offsetHeight : 80;
+            const targetPosition = target.getBoundingClientRect().top + window.scrollY - headerHeight;
+
+            window.scrollTo({
+              top: targetPosition,
+              behavior: 'smooth'
+            });
+          }
+        });
+      });
+    }
+  }
+
+
+  /* ========================================
+     BADGE ANIMATIONS
+     Badge hover effects are now handled purely in CSS
+     for better maintainability and performance
+     ======================================== */
+
+  class BadgeAnimations {
+    constructor() {
+      // Badge animations handled via CSS (.product-card:hover .product-card__badge)
+      // This class is kept for backwards compatibility
+    }
+  }
+
+
+  /* ========================================
+     NEWSLETTER FORM HANDLER
+     ======================================== */
+
+  class NewsletterForm {
+    constructor() {
+      this.form = document.querySelector('.newsletter-form');
+      this.input = null;
+      this.submit = null;
+      this.message = null;
+
+      if (this.form) {
+        this.input = this.form.querySelector('.newsletter-form__input');
+        this.submit = this.form.querySelector('.newsletter-form__submit');
+        this.message = document.querySelector('.newsletter-form__message');
+        this.init();
+      }
+    }
+
+    init() {
+      this.form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        this.handleSubmit();
+      });
+    }
+
+    handleSubmit() {
+      const email = this.input.value.trim();
+
+      // Clear previous messages
+      this.clearMessage();
+
+      if (!this.validateEmail(email)) {
+        this.showMessage('Please enter a valid email address.', 'error');
+        this.input.focus();
+        return;
+      }
+
+      // Show loading state
+      this.submit.disabled = true;
+      this.showMessage('Subscribing...', '');
+
+      // Simulate API call (replace with real implementation)
+      setTimeout(() => {
+        this.showMessage('Thank you for subscribing!', 'success');
+        this.submit.disabled = false;
+        this.form.reset();
+
+        // Auto-hide success message after 5 seconds
+        setTimeout(() => {
+          this.clearMessage();
+        }, 5000);
+      }, 1000);
+    }
+
+    showMessage(text, type) {
+      if (!this.message) return;
+
+      this.message.textContent = text;
+      this.message.classList.add('visible');
+      this.message.classList.remove('success', 'error');
+
+      if (type) {
+        this.message.classList.add(type);
+      }
+    }
+
+    clearMessage() {
+      if (!this.message) return;
+
+      this.message.classList.remove('visible', 'success', 'error');
+      this.message.textContent = '';
+    }
+
+    validateEmail(email) {
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(email);
+    }
+  }
+
+
+  /* ========================================
+     IMAGE LAZY LOADING FALLBACK
+     (For browsers that don't support native lazy loading)
+     ======================================== */
+
+  class LazyLoadImages {
+    constructor() {
+      this.images = document.querySelectorAll('img[loading="lazy"]');
+      this.init();
+    }
+
+    init() {
+      // Check if browser supports native lazy loading
+      if ('loading' in HTMLImageElement.prototype) {
+        return; // Browser supports native lazy loading
+      }
+
+      // Fallback to Intersection Observer
+      if (!('IntersectionObserver' in window)) {
+        // Load all images immediately if no IntersectionObserver support
+        this.images.forEach(img => this.loadImage(img));
+        return;
+      }
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            this.loadImage(entry.target);
+            observer.unobserve(entry.target);
+          }
+        });
+      }, {
+        rootMargin: '50px'
+      });
+
+      this.images.forEach(img => observer.observe(img));
+    }
+
+    loadImage(img) {
+      if (img.dataset.src) {
+        img.src = img.dataset.src;
+        img.removeAttribute('data-src');
+      }
+    }
+  }
+
+
+  /* ========================================
+     PERFORMANCE OPTIMIZATION
+     Debounce utility for resize events
+     ======================================== */
+
+  function debounce(func, wait = 250) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
+
+
+  /* ========================================
+     INITIALIZE ALL MODULES
+     ======================================== */
+
+  function init() {
+    // Wait for DOM to be fully loaded
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeModules);
     } else {
-      // Scrolling UP
-      header.classList.remove('site-header--hidden');
+      initializeModules();
     }
-    
-    lastScrollTop = scrollTop;
-  }, { passive: true });
-});
+  }
+
+  function initializeModules() {
+    // Initialize all modules with error handling
+    try {
+      new HeaderScroll();
+      new MobileMenu();
+      new FadeInObserver();
+      new ParallaxEffect();
+      new SmoothScroll();
+      new BadgeAnimations();
+      new NewsletterForm();
+      new LazyLoadImages();
+    } catch (error) {
+      // Fail silently in production, but preserve partial functionality
+    }
+  }
+
+  // Start the application
+  init();
+
+
+  /* ========================================
+     HANDLE WINDOW RESIZE
+     Update parallax and other dynamic elements
+     ======================================== */
+
+  window.addEventListener('resize', debounce(() => {
+    // Re-calculate positions if needed
+    // This could be expanded based on specific needs
+  }, 250));
+
+})();
 </script>
