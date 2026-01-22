@@ -1,61 +1,61 @@
 {%- comment -%}
   ----------------------------------------------------------------------------------
   RYSSA PRODUCT GRID
-  - Dynamic collection loop
-  - Automatic Badging (New, Sale, Sold Out)
-  - Uses your CSS Grid system
+  - Renamed classes to 'ryssa-*' to prevent theme conflicts
+  - Fully isolated styling
   ----------------------------------------------------------------------------------
 {%- endcomment -%}
 
-<section class="product-grid section" data-section-id="{{ section.id }}">
-  <div class="container">
+<section class="ryssa-section section" data-section-id="{{ section.id }}">
+  <div class="ryssa-container">
     
     {%- if section.settings.title != blank or section.settings.eyebrow != blank -%}
-      <header class="section-header fade-in">
+      <header class="ryssa-section-header fade-in">
         {%- if section.settings.eyebrow != blank -%}
-          <span class="eyebrow">{{ section.settings.eyebrow }}</span>
+          <span class="ryssa-eyebrow">{{ section.settings.eyebrow }}</span>
         {%- endif -%}
         {%- if section.settings.title != blank -%}
-          <h2 class="section-title">{{ section.settings.title }}</h2>
+          <h2 class="ryssa-section-title">{{ section.settings.title }}</h2>
         {%- endif -%}
       </header>
     {%- endif -%}
 
-    <div class="product-grid__items">
+    <div class="ryssa-grid__items">
       {%- assign collection = section.settings.collection -%}
       {%- assign limit = section.settings.products_to_show -%}
 
       {%- if collection != blank and collection.products_count > 0 -%}
         {%- for product in collection.products limit: limit -%}
-          <article class="product-card fade-in">
-            <a href="{{ product.url }}" class="product-card__link">
+          <article class="ryssa-card fade-in">
+            <a href="{{ product.url }}" class="ryssa-card__link">
               
-              <div class="product-card__image">
+              <div class="ryssa-card__image-wrapper">
                 {%- comment -%} Badge Logic {%- endcomment -%}
                 {%- if product.available == false -%}
-                  <span class="product-card__badge">Sold Out</span>
+                  <span class="ryssa-card__badge">Sold Out</span>
                 {%- elsif product.compare_at_price > product.price -%}
-                  <span class="product-card__badge">Sale</span>
+                  <span class="ryssa-card__badge">Sale</span>
                 {%- elsif product.tags contains 'New' or product.tags contains 'new' -%}
-                  <span class="product-card__badge">New</span>
+                  <span class="ryssa-card__badge">New</span>
                 {%- endif -%}
 
                 {%- if product.featured_media -%}
-                  {{ product.featured_media | image_url: width: 1200 | image_tag: 
+                  {{ product.featured_media | image_url: width: 1000 | image_tag: 
                     loading: 'lazy',
+                    class: 'ryssa-card__image',
                     width: product.featured_media.width,
                     height: product.featured_media.height,
                     sizes: '(min-width: 990px) 25vw, (min-width: 750px) 33vw, 50vw',
                     alt: product.title | escape
                   }}
                 {%- else -%}
-                  {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                  {{ 'product-1' | placeholder_svg_tag: 'ryssa-card__image placeholder-svg' }}
                 {%- endif -%}
               </div>
 
-              <div class="product-card__info">
-                <h3 class="product-card__title">{{ product.title }}</h3>
-                <div class="product-card__price">
+              <div class="ryssa-card__info">
+                <h3 class="ryssa-card__title">{{ product.title }}</h3>
+                <div class="ryssa-card__price">
                   {%- if product.compare_at_price > product.price -%}
                     <span class="visually-hidden">Regular price</span>
                     <s style="color: var(--color-text-secondary); margin-right: 5px;">{{ product.compare_at_price | money }}</s>
@@ -71,18 +71,18 @@
         {%- endfor -%}
       
       {%- else -%}
-        {%- comment -%} EMPTY STATE (Placeholders) {%- endcomment -%}
+        {%- comment -%} EMPTY STATE {%- endcomment -%}
         {%- for i in (1..limit) -%}
-          <article class="product-card fade-in">
-            <a href="#" class="product-card__link">
-              <div class="product-card__image">
-                <span class="product-card__badge">New</span>
+          <article class="ryssa-card fade-in">
+            <a href="#" class="ryssa-card__link">
+              <div class="ryssa-card__image-wrapper">
+                <span class="ryssa-card__badge">New</span>
                 {%- capture placeholder_index -%}{% cycle 1, 2, 3, 4, 5, 6 %}{%- endcapture -%}
-                {{ 'product-' | append: placeholder_index | placeholder_svg_tag: 'placeholder-svg' }}
+                {{ 'product-' | append: placeholder_index | placeholder_svg_tag: 'ryssa-card__image placeholder-svg' }}
               </div>
-              <div class="product-card__info">
-                <h3 class="product-card__title">Example Product {{ i }}</h3>
-                <p class="product-card__price">{{ 19900 | money }}</p>
+              <div class="ryssa-card__info">
+                <h3 class="ryssa-card__title">Example Product {{ i }}</h3>
+                <p class="ryssa-card__price">{{ 19900 | money }}</p>
               </div>
             </a>
           </article>
@@ -94,113 +94,175 @@
 
 {% stylesheet %}
   /* ========================================
-     PRODUCT GRID CSS
+     RYSSA ISOLATED GRID STYLES
      ======================================== */
+  
+  .ryssa-container {
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
 
-  .product-grid__items {
+  .ryssa-section-header {
+    text-align: center;
+    margin-bottom: 48px; /* Spacing-2xl */
+  }
+
+  .ryssa-eyebrow {
+    display: block;
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: #525252;
+    margin-bottom: 16px;
+  }
+
+  .ryssa-section-title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4vw, 3.052rem); /* text-4xl */
+    font-weight: 300;
+    margin: 0;
+  }
+
+  /* --- GRID --- */
+  .ryssa-grid__items {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: var(--spacing-xl) var(--spacing-md);
+    gap: 48px 24px; /* Row gap, Col gap */
   }
 
-  .product-card {
+  /* --- CARD --- */
+  .ryssa-card {
     display: block;
+    position: relative;
   }
 
-  .product-card__link {
+  .ryssa-card__link {
     display: block;
-    transition: opacity var(--duration-fast) var(--ease-default);
+    text-decoration: none;
+    color: inherit;
   }
 
-  .product-card__image {
+  .ryssa-card__image-wrapper {
     position: relative;
     aspect-ratio: 3 / 4;
-    margin-bottom: var(--spacing-sm);
+    margin-bottom: 16px;
     overflow: hidden;
-    background-color: var(--color-cloud);
+    background-color: #F8F6F3;
   }
 
-  .product-card__image img,
-  .product-card__image svg {
+  .ryssa-card__image {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform var(--duration-slow) var(--ease-smooth);
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    display: block;
   }
 
-  /* Hover Effects */
-  @media (hover: hover) {
-    .product-card:hover .product-card__image img,
-    .product-card:hover .product-card__image svg {
-      transform: scale(1.05);
-      opacity: 0.95;
-    }
-    
-    .product-card:hover .product-card__badge {
-      transform: scale(1.05);
-    }
+  .ryssa-card__image svg {
+    background: #f0f0f0;
   }
 
-  .product-card__badge {
+  /* --- BADGE --- */
+  .ryssa-card__badge {
     position: absolute;
-    top: var(--spacing-sm);
-    left: var(--spacing-sm);
+    top: 16px;
+    left: 16px;
     padding: 6px 12px;
     font-size: 11px;
-    font-weight: var(--font-semibold);
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: var(--tracking-wider);
-    background-color: var(--color-primary);
-    color: var(--color-black);
-    border-radius: var(--radius-sm);
+    letter-spacing: 0.15em;
+    background-color: #e9f5ff; /* Primary pale blue */
+    color: #1A1A1A;
+    border-radius: 2px;
     z-index: 2;
-    box-shadow: 0 2px 8px rgba(233, 245, 255, 0.3);
-    transition: transform var(--duration-fast) var(--ease-smooth);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: transform 0.15s ease;
   }
 
-  .product-card__info {
+  /* --- INFO --- */
+  .ryssa-card__info {
     text-align: center;
   }
 
-  .product-card__title {
-    font-size: var(--text-base);
-    font-weight: var(--font-regular);
-    margin-bottom: var(--spacing-xs);
-    line-height: var(--leading-normal);
+  .ryssa-card__title {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 400;
+    margin: 0 0 8px 0;
+    line-height: 1.5;
+    color: #1A1A1A;
   }
 
-  .product-card__price {
-    font-size: var(--text-base);
-    color: var(--color-text-secondary);
+  .ryssa-card__price {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    color: #525252;
+  }
+
+  /* --- HOVER EFFECTS --- */
+  @media (hover: hover) {
+    .ryssa-card:hover .ryssa-card__image {
+      transform: scale(1.05);
+    }
+    
+    .ryssa-card:hover .ryssa-card__badge {
+      transform: scale(1.05);
+    }
+    
+    .ryssa-card__link:hover {
+      opacity: 1; /* Reset theme opacity if needed */
+    }
   }
   
-  /* Mobile Adjustments */
+  /* --- MOBILE --- */
   @media (max-width: 480px) {
-    .product-grid__items {
+    .ryssa-grid__items {
       grid-template-columns: 1fr;
     }
   }
 {% endstylesheet %}
 
 <script>
-  // Simple intersection observer for this section's fade-in elements
-  document.addEventListener('DOMContentLoaded', function() {
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
-    };
+  (function() {
+    document.addEventListener('DOMContentLoaded', function() {
+      const section = document.querySelector('[data-section-id="{{ section.id }}"]');
+      if(!section) return;
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, observerOptions);
+      const fadeElements = section.querySelectorAll('.fade-in');
+      if (fadeElements.length === 0) return;
 
-    document.querySelectorAll('.product-grid .fade-in').forEach(el => observer.observe(el));
-  });
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      };
+
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const target = entry.target;
+              // Add a small stagger effect based on index
+              const index = Array.from(fadeElements).indexOf(target);
+              setTimeout(() => {
+                target.classList.add('visible');
+              }, index * 50); // 50ms stagger
+              
+              observer.unobserve(target);
+            }
+          });
+        }, observerOptions);
+
+        fadeElements.forEach(el => observer.observe(el));
+      } else {
+        fadeElements.forEach(el => el.classList.add('visible'));
+      }
+    });
+  })();
 </script>
 
 {% schema %}
