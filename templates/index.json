@@ -35,10 +35,38 @@
         "collection": "all",
         "products_to_show": 6
       }
+    },
+    "split_content_dm9TBQ": {
+      "type": "split-content",
+      "name": "Split Content Block",
+      "settings": {
+        "eyebrow": "The Collection",
+        "title": "Timeless Elegance",
+        "text": "<p>Discover pieces designed for the modern wardrobe, where simplicity meets sophistication.</p>",
+        "link_text": "View Collection",
+        "link_url": "",
+        "layout": "image_left",
+        "background_style": "default"
+      }
+    },
+    "split_content_BMwzrX": {
+      "type": "split-content",
+      "name": "Split Content (Reverse)",
+      "settings": {
+        "eyebrow": "The Collection",
+        "title": "Artisanal Quality",
+        "text": "<p>Discover pieces designed for the modern wardrobe, where simplicity meets sophistication.</p>",
+        "link_text": "View Collection",
+        "link_url": "",
+        "layout": "image_right",
+        "background_style": "pale_blue"
+      }
     }
   },
   "order": [
     "hero_jVaWmY",
-    "product_list_fa6P9H"
+    "product_list_fa6P9H",
+    "split_content_dm9TBQ",
+    "split_content_BMwzrX"
   ]
 }
