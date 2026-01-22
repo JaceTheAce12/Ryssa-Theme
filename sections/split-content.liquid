@@ -1,0 +1,170 @@
+{%- comment -%}
+  ----------------------------------------------------------------------------------
+  RYSSA SPLIT CONTENT SECTION
+  - Reusable section for "Image with Text" layouts
+  - Supports "Reverse" and "Pale Blue" variants via settings
+  ----------------------------------------------------------------------------------
+{%- endcomment -%}
+
+{% liquid
+  assign layout_class = ''
+  if section.settings.layout == 'image_right'
+    assign layout_class = 'split-block--reverse'
+  endif
+
+  assign color_class = ''
+  if section.settings.background_style == 'pale_blue'
+    assign color_class = 'split-block--pale-blue'
+  endif
+%}
+
+<section 
+  class="split-block {{ layout_class }} {{ color_class }}" 
+  data-section-id="{{ section.id }}"
+>
+  
+  <div class="split-block__image parallax-element">
+    {%- if section.settings.image != blank -%}
+      {{ section.settings.image | image_url: width: 1280 | image_tag: 
+        loading: 'lazy',
+        width: section.settings.image.width,
+        height: section.settings.image.height,
+        sizes: '(min-width: 990px) 50vw, 100vw',
+        alt: section.settings.image.alt | escape
+      }}
+    {%- else -%}
+      {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder-svg' }}
+    {%- endif -%}
+  </div>
+
+  <div class="split-block__content fade-in">
+    {%- if section.settings.eyebrow != blank -%}
+      <span class="eyebrow">{{ section.settings.eyebrow }}</span>
+    {%- endif -%}
+
+    {%- if section.settings.title != blank -%}
+      <h2>{{ section.settings.title }}</h2>
+    {%- endif -%}
+
+    {%- if section.settings.text != blank -%}
+      <div class="rte">
+        {{ section.settings.text }}
+      </div>
+    {%- endif -%}
+
+    {%- if section.settings.link_text != blank and section.settings.link_url != blank -%}
+      <a href="{{ section.settings.link_url }}" class="arrow-link">
+        <span>{{ section.settings.link_text }}</span>
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M4 10H16M16 10L11 5M16 10L11 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    {%- endif -%}
+  </div>
+
+</section>
+
+{% schema %}
+{
+  "name": "Split Content Block",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow Text",
+      "default": "The Collection"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Timeless Elegance"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Description",
+      "default": "<p>Discover pieces designed for the modern wardrobe, where simplicity meets sophistication.</p>"
+    },
+    {
+      "type": "text",
+      "id": "link_text",
+      "label": "Link Label",
+      "default": "View Collection"
+    },
+    {
+      "type": "url",
+      "id": "link_url",
+      "label": "Link URL"
+    },
+    {
+      "type": "header",
+      "content": "Layout & Style"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Image Position",
+      "options": [
+        {
+          "value": "image_left",
+          "label": "Left"
+        },
+        {
+          "value": "image_right",
+          "label": "Right"
+        }
+      ],
+      "default": "image_left"
+    },
+    {
+      "type": "select",
+      "id": "background_style",
+      "label": "Background Style",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default (White/Cloud)"
+        },
+        {
+          "value": "pale_blue",
+          "label": "Pale Blue Accent"
+        }
+      ],
+      "default": "default"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Split Content Block",
+      "settings": {
+        "title": "Timeless Elegance",
+        "layout": "image_left"
+      }
+    },
+    {
+      "name": "Split Content (Reverse)",
+      "settings": {
+        "title": "Artisanal Quality",
+        "layout": "image_right",
+        "background_style": "pale_blue"
+      }
+    }
+  ]
+}
+{% endschema %}
