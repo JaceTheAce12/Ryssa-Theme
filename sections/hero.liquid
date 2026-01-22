@@ -1,8 +1,7 @@
 {%- comment -%}
   ----------------------------------------------------------------------------------
   RYSSA HERO SECTION - MAGAZINE COVER STYLE
-  - Features: Grain Texture, Asymmetrical Left Alignment, Scroll Indicator
-  - Content: Matches specific HTML structure (Headline, Subhead, CTA)
+  - Content: Enforced Editorial Typography (Line 1 Normal, Line 2 Italic)
   ----------------------------------------------------------------------------------
 {%- endcomment -%}
 
@@ -94,8 +93,11 @@
   </div>
 
   <div class="hero__content fade-in">
-    {%- if section.settings.title != blank -%}
-      <h1 class="hero__headline">{{ section.settings.title }}</h1>
+    {%- if section.settings.title_line_1 != blank or section.settings.title_line_2 != blank -%}
+      <h1 class="hero__headline">
+        {{ section.settings.title_line_1 }}<br>
+        <em>{{ section.settings.title_line_2 }}</em>
+      </h1>
     {%- endif -%}
     
     {%- if section.settings.text != blank -%}
@@ -175,11 +177,16 @@
       "content": "Content"
     },
     {
-      "type": "html",
-      "id": "title",
-      "label": "Headline (HTML allowed)",
-      "default": "Ethereal<br><em>Minimalism</em>",
-      "info": "Use <br> for line breaks and <em> for italics."
+      "type": "text",
+      "id": "title_line_1",
+      "label": "Headline (Line 1)",
+      "default": "Ethereal"
+    },
+    {
+      "type": "text",
+      "id": "title_line_2",
+      "label": "Headline (Line 2 - Italic)",
+      "default": "Minimalism"
     },
     {
       "type": "textarea",
@@ -235,9 +242,9 @@
   }
 
   /* ========================================
-     CSS CUSTOM PROPERTIES & RESET
-     (Scoped to hero to ensure exact match)
+     HERO SECTION - MAGAZINE COVER CSS
      ======================================== */
+
   .hero {
     --color-white: #FFFFFF;
     --color-black: #1A1A1A;
@@ -252,13 +259,7 @@
     --spacing-xl: 48px;
     --spacing-2xl: 80px;
     --spacing-3xl: 120px;
-  }
-
-  /* ========================================
-     HERO SECTION - MAGAZINE COVER CSS
-     ======================================== */
-
-  .hero {
+    
     position: relative;
     display: flex;
     align-items: center;
@@ -332,6 +333,7 @@
 
   .hero__headline em {
     display: block;
+    font-family: var(--font-editorial, 'Playfair Display', serif);
     font-style: italic;
     font-weight: 400;
     margin-top: 0.1em;
@@ -387,10 +389,7 @@
     }
   }
 
-  /* ========================================
-     BUTTONS
-     ======================================== */
-
+  /* BUTTONS (Scoped) */
   .button {
     display: inline-flex;
     align-items: center;
@@ -413,6 +412,9 @@
   }
 
   .button--primary:hover {
+    background-color: transparent;
+    color: var(--color-white);
+    border-color: var(--color-white);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12); /* shadow-md */
   }
