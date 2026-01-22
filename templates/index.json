@@ -46,7 +46,9 @@
         "link_text": "View Collection",
         "link_url": "",
         "layout": "image_left",
-        "background_style": "default"
+        "bg_color": "#f8f6f3",
+        "text_color": "#1a1a1a",
+        "accent_color": "#8b7355"
       }
     },
     "split_content_BMwzrX": {
@@ -59,7 +61,9 @@
         "link_text": "View Collection",
         "link_url": "",
         "layout": "image_right",
-        "background_style": "pale_blue"
+        "bg_color": "#e9f5ff",
+        "text_color": "#1a1a1a",
+        "accent_color": "#8b7355"
       }
     }
   },
