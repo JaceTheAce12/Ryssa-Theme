@@ -1,9 +1,9 @@
 {%- comment -%}
   ----------------------------------------------------------------------------------
-  RYSSA HERO SECTION - MAGAZINE COVER STYLE
-  - Features: Grain Texture, Issue Badge, Decorative Letter, Scroll Indicator
+  RYSSA HERO SECTION - MAGAZINE COVER STYLE (CLEAN)
+  - Features: Grain Texture, Asymmetrical Left Alignment, Scroll Indicator
+  - Removed: Issue Badge, Decorative Letter
   - Supports: Desktop/Mobile Images & Videos
-  - Content: HTML-enabled headline for editorial styling
   ----------------------------------------------------------------------------------
 {%- endcomment -%}
 
@@ -91,20 +91,8 @@
     {%- endif -%}
 
     <div class="hero__overlay"></div>
-    
     <div class="hero__grain-texture"></div>
   </div>
-
-  {%- if section.settings.issue_number != blank -%}
-    <div class="hero__issue-badge">
-      <span class="hero__issue-number">{{ section.settings.issue_number }}</span>
-      <span class="hero__issue-season">{{ section.settings.issue_season }}</span>
-    </div>
-  {%- endif -%}
-
-  {%- if section.settings.decorative_letter != blank -%}
-    <div class="hero__decorative-letter" aria-hidden="true">{{ section.settings.decorative_letter }}</div>
-  {%- endif -%}
 
   <div class="hero__content fade-in">
     {%- if section.settings.title != blank -%}
@@ -135,28 +123,6 @@
 {
   "name": "Ryssa Hero (Magazine)",
   "settings": [
-    {
-      "type": "header",
-      "content": "Magazine Elements"
-    },
-    {
-      "type": "text",
-      "id": "issue_number",
-      "label": "Issue Number",
-      "default": "Issue 01"
-    },
-    {
-      "type": "text",
-      "id": "issue_season",
-      "label": "Season",
-      "default": "Spring 2026"
-    },
-    {
-      "type": "text",
-      "id": "decorative_letter",
-      "label": "Decorative Letter",
-      "default": "R"
-    },
     {
       "type": "header",
       "content": "Desktop Media"
@@ -244,7 +210,7 @@
 
 {% stylesheet %}
   /* ========================================
-     HELPER CLASSES (Liquid Logic)
+     HELPER CLASSES 
      ======================================== */
   .desktop-only { display: block; }
   .mobile-only { display: none; }
@@ -270,22 +236,30 @@
   }
 
   /* ========================================
-     HERO SECTION - MAGAZINE COVER CSS
+     CSS CUSTOM PROPERTIES & RESET
+     (Scoped to hero to ensure exact match)
      ======================================== */
-
   .hero {
-    /* Define local variables based on provided CSS logic if needed, 
-       otherwise assumes global vars exist. Defaults added for safety. */
     --color-white: #FFFFFF;
     --color-black: #1A1A1A;
-    --color-gold: #8B7355; 
-    --spacing-xs: 8px;
+    --color-primary: #e9f5ff;
+    --color-primary-hover: #d4ecff;
+    --color-primary-dark: #c0e3ff;
+    --font-editorial: 'Bodoni Moda', 'Didot', 'Playfair Display', Georgia, serif;
+    --font-body: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    
     --spacing-md: 24px;
     --spacing-lg: 32px;
     --spacing-xl: 48px;
     --spacing-2xl: 80px;
     --spacing-3xl: 120px;
-    
+  }
+
+  /* ========================================
+     HERO SECTION - MAGAZINE COVER CSS
+     ======================================== */
+
+  .hero {
     position: relative;
     display: flex;
     align-items: center;
@@ -335,51 +309,6 @@
     mix-blend-mode: overlay;
   }
 
-  /* Issue Badge - Magazine Style */
-  .hero__issue-badge {
-    position: absolute;
-    top: var(--spacing-xl);
-    right: var(--spacing-xl);
-    z-index: 10;
-    text-align: right;
-    color: var(--color-white);
-    font-family: var(--font-body);
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-  }
-
-  .hero__issue-number {
-    display: block;
-    font-size: 11px;
-    font-weight: 600;
-    margin-bottom: 4px;
-    opacity: 0.9;
-  }
-
-  .hero__issue-season {
-    display: block;
-    font-size: 14px;
-    font-weight: 500;
-    border-top: 2px solid var(--color-gold);
-    padding-top: 8px;
-  }
-
-  /* Decorative Letter */
-  .hero__decorative-letter {
-    position: absolute;
-    top: 50%;
-    right: 5%;
-    transform: translateY(-50%);
-    font-family: var(--font-display);
-    font-size: clamp(15rem, 25vw, 25rem);
-    font-weight: 300;
-    color: rgba(255, 255, 255, 0.05);
-    z-index: 2;
-    line-height: 1;
-    pointer-events: none;
-    user-select: none;
-  }
-
   /* Magazine-style Content - Asymmetrical Left Placement */
   .hero__content {
     position: relative;
@@ -392,9 +321,9 @@
   }
 
   .hero__headline {
-    font-family: var(--font-display);
+    font-family: var(--font-editorial);
     font-size: clamp(3.5rem, 8vw, 7.5rem);
-    font-weight: 400;
+    font-weight: 400; /* Regular */
     letter-spacing: 0.02em;
     line-height: 0.95;
     margin-bottom: var(--spacing-lg);
@@ -404,14 +333,13 @@
 
   .hero__headline em {
     display: block;
-    font-family: var(--font-editorial, 'Playfair Display', serif);
     font-style: italic;
     font-weight: 400;
     margin-top: 0.1em;
   }
 
   .hero__subheadline {
-    font-family: var(--font-editorial, 'Playfair Display', serif);
+    font-family: var(--font-editorial);
     font-style: italic;
     font-size: clamp(1.25rem, 2vw, 2rem);
     font-weight: 400;
@@ -436,7 +364,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--spacing-xs);
+    gap: 8px; /* spacing-xs */
     color: var(--color-white);
     font-family: var(--font-body);
     font-size: 11px;
@@ -460,7 +388,10 @@
     }
   }
 
-  /* BUTTONS (Scoped) */
+  /* ========================================
+     BUTTONS
+     ======================================== */
+
   .button {
     display: inline-flex;
     align-items: center;
@@ -469,10 +400,10 @@
     font-size: 14px;
     font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.1em; /* tracking-wide */
     border: 1px solid transparent;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     min-width: 200px;
   }
 
@@ -483,8 +414,73 @@
   }
 
   .button--primary:hover {
-    background-color: transparent;
-    color: var(--color-white);
-    border-color: var(--color-white);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12); /* shadow-md */
+  }
+
+  .button--primary:focus-visible {
+    outline: 2px solid var(--color-primary-dark);
+    outline-offset: 3px;
+  }
+
+  .button--primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); /* shadow-sm */
+  }
+
+  /* ========================================
+     RESPONSIVE BREAKPOINTS
+     ======================================== */
+
+  /* Tablet (768px) */
+  @media (max-width: 768px) {
+    .hero {
+      min-height: 600px;
+      padding: 0 24px; /* spacing-md */
+      justify-content: center;
+    }
+
+    .hero__content {
+      margin-left: 0;
+      max-width: 100%;
+      text-align: center;
+    }
+
+    .hero__headline {
+      font-size: clamp(2.5rem, 10vw, 4rem);
+    }
+
+    .hero__subheadline {
+      font-size: clamp(1rem, 4vw, 1.5rem);
+      max-width: 100%;
+    }
+
+    .hero__scroll-indicator {
+      bottom: 32px; /* spacing-lg */
+    }
+  }
+
+  /* Mobile (480px) */
+  @media (max-width: 480px) {
+    .hero__headline {
+      font-size: 2.5rem;
+    }
+
+    .button {
+      min-width: 160px;
+      padding: 16px 32px;
+    }
+  }
+
+  /* Desktop Large (1024px+) */
+  @media (min-width: 1024px) {
+    .hero {
+      justify-content: flex-start;
+    }
+
+    .hero__content {
+      text-align: left;
+      margin-left: clamp(24px, 5vw, 120px);
+    }
   }
 {% endstylesheet %}
