@@ -1,22 +1,29 @@
 {%- comment -%}
   ----------------------------------------------------------------------------------
   RYSSA FOOTER
-  - Matches your exact HTML structure.
-  - Dynamic: Menus, Newsletter, Social Links, and Copyright Year.
+  - Exact HTML structure provided
+  - Dynamic content (Menus, Newsletter, Copyright)
+  - Integrated CSS
   ----------------------------------------------------------------------------------
 {%- endcomment -%}
 
 <style>
+  /* Map Schema Settings to CSS Variables for this section */
   [data-section-id="{{ section.id }}"] {
-    background-color: {{ section.settings.bg_color }};
-    color: {{ section.settings.text_color }};
-  }
-  [data-section-id="{{ section.id }}"] .newsletter-form__submit {
-    background-color: {{ section.settings.accent_color }};
-    color: {{ section.settings.bg_color }};
-  }
-  [data-section-id="{{ section.id }}"] a:hover {
-    color: {{ section.settings.accent_color }};
+    --color-black: {{ section.settings.bg_color }};
+    --color-white: {{ section.settings.text_color }};
+    --color-primary: {{ section.settings.accent_color }};
+    --color-primary-hover: {{ section.settings.accent_color | color_lighten: 10 }};
+    
+    /* Re-defining spacing vars locally if theme doesn't have them */
+    --spacing-xs: 8px;
+    --spacing-sm: 16px;
+    --spacing-md: 24px;
+    --spacing-lg: 32px;
+    --spacing-xl: 48px;
+    --spacing-2xl: 80px;
+    --radius-md: 4px;
+    --radius-sm: 2px;
   }
 </style>
 
@@ -31,16 +38,10 @@
         {%- form 'customer', class: 'newsletter-form' -%}
           <input type="hidden" name="contact[tags]" value="newsletter">
           
-          {%- if form.errors -%}
-            <div class="newsletter-form__message error" role="alert">
-              <small>{{ form.errors.translated_fields['email'] | capitalize }} {{ form.errors.messages['email'] }}</small>
-            </div>
-          {%- endif -%}
-
           {%- if form.posted_successfully? -%}
-            <div class="newsletter-form__message success" role="status" aria-live="polite">
-              <small>Thank you for subscribing!</small>
-            </div>
+            <p class="newsletter-form__message success visible" role="status" aria-live="polite">
+              Thank you for subscribing!
+            </p>
           {%- else -%}
             <label for="newsletter-email-{{ section.id }}" class="visually-hidden">Email address</label>
             <input
@@ -59,6 +60,12 @@
               </svg>
             </button>
           {%- endif -%}
+
+          {%- if form.errors -%}
+            <p class="newsletter-form__message error visible">
+              {{ form.errors.translated_fields['email'] | capitalize }} {{ form.errors.messages['email'] }}
+            </p>
+          {%- endif -%}
         {%- endform -%}
       </div>
 
@@ -68,10 +75,10 @@
           {%- for link in linklists[section.settings.menu_1].links -%}
             <li><a href="{{ link.url }}">{{ link.title }}</a></li>
           {%- else -%}
-            {%- comment -%} Fallback links for preview {%- endcomment -%}
             <li><a href="#">New Arrivals</a></li>
             <li><a href="#">Women</a></li>
             <li><a href="#">Men</a></li>
+            <li><a href="#">Collections</a></li>
           {%- endfor -%}
         </ul>
       </div>
@@ -120,199 +127,39 @@
       <div class="site-footer__social">
         {%- if settings.social_instagram_link != blank -%}
           <a href="{{ settings.social_instagram_link }}" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor"><rect x="3" y="3" width="14" height="14" rx="4" stroke-width="1.5"/><circle cx="10" cy="10" r="3.5" stroke-width="1.5"/><circle cx="14.5" cy="5.5" r="0.5" fill="currentColor"/></svg>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" aria-hidden="true">
+              <rect x="3" y="3" width="14" height="14" rx="4" stroke-width="1.5"/>
+              <circle cx="10" cy="10" r="3.5" stroke-width="1.5"/>
+              <circle cx="14.5" cy="5.5" r="0.5" fill="currentColor"/>
+            </svg>
           </a>
         {%- endif -%}
-        {%- if settings.social_facebook_link != blank -%}
-          <a href="{{ settings.social_facebook_link }}" aria-label="Facebook" target="_blank" rel="noopener noreferrer">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M18 10c0-4.418-3.582-8-8-8S2 5.582 2 10c0 3.99 2.94 7.293 6.75 7.904v-5.592H6.719V10h2.031V8.237c0-2.005 1.194-3.112 3.022-3.112.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.616-1.303 1.258V10h2.219l-.355 2.312H11.25v5.592C15.06 17.293 18 13.99 18 10z"/></svg>
-          </a>
-        {%- endif -%}
-        {%- if settings.social_twitter_link != blank -%}
-          <a href="{{ settings.social_twitter_link }}" aria-label="Twitter" target="_blank" rel="noopener noreferrer">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M18.89 5.13c-.65.29-1.35.49-2.08.58.75-.45 1.32-1.16 1.59-2-.7.42-1.47.72-2.29.88-.66-.7-1.6-1.14-2.64-1.14-2 0-3.62 1.62-3.62 3.62 0 .28.03.56.09.83-3.01-.15-5.68-1.59-7.46-3.78-.31.53-.49 1.16-.49 1.82 0 1.26.64 2.37 1.61 3.02-.59-.02-1.15-.18-1.64-.45v.05c0 1.75 1.25 3.21 2.91 3.54-.3.08-.62.13-.95.13-.23 0-.46-.02-.68-.07.46 1.44 1.8 2.48 3.38 2.51-1.24.97-2.8 1.55-4.5 1.55-.29 0-.58-.02-.86-.05 1.6 1.03 3.5 1.63 5.54 1.63 6.65 0 10.29-5.51 10.29-10.29 0-.16 0-.31-.01-.47.71-.51 1.32-1.15 1.81-1.88z"/></svg>
-          </a>
-        {%- endif -%}
+        
         {%- if settings.social_pinterest_link != blank -%}
           <a href="{{ settings.social_pinterest_link }}" aria-label="Pinterest" target="_blank" rel="noopener noreferrer">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2C5.58 2 2 5.58 2 10c0 3.4 2.11 6.3 5.08 7.45-.07-.64-.13-1.62.03-2.32.14-.62.93-3.93.93-3.93s-.24-.48-.24-1.18c0-1.11.64-1.94 1.44-1.94.68 0 1.01.51 1.01 1.12 0 .68-.44 1.7-.66 2.65-.19.79.4 1.43 1.18 1.43 1.42 0 2.51-1.5 2.51-3.66 0-1.91-1.37-3.25-3.33-3.25-2.27 0-3.6 1.7-3.6 3.46 0 .69.26 1.42.59 1.82.07.08.08.15.06.23-.06.26-.21.85-.24.97-.04.15-.13.18-.3.11-1-.47-1.63-1.93-1.63-3.11 0-2.52 1.83-4.84 5.28-4.84 2.77 0 4.93 1.98 4.93 4.62 0 2.76-1.74 4.98-4.15 4.98-.81 0-1.57-.42-1.83-.92 0 0-.4 1.53-.5 1.9-.18.69-.67 1.56-1 2.09.75.23 1.55.36 2.38.36 4.42 0 8-3.58 8-8s-3.58-8-8-8z"/></svg>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path d="M10 2C5.58 2 2 5.58 2 10c0 3.4 2.11 6.3 5.08 7.45-.07-.64-.13-1.62.03-2.32.14-.62.93-3.93.93-3.93s-.24-.48-.24-1.18c0-1.11.64-1.94 1.44-1.94.68 0 1.01.51 1.01 1.12 0 .68-.44 1.7-.66 2.65-.19.79.4 1.43 1.18 1.43 1.42 0 2.51-1.5 2.51-3.66 0-1.91-1.37-3.25-3.33-3.25-2.27 0-3.6 1.7-3.6 3.46 0 .69.26 1.42.59 1.82.07.08.08.15.06.23-.06.26-.21.85-.24.97-.04.15-.13.18-.3.11-1-.47-1.63-1.93-1.63-3.11 0-2.52 1.83-4.84 5.28-4.84 2.77 0 4.93 1.98 4.93 4.62 0 2.76-1.74 4.98-4.15 4.98-.81 0-1.57-.42-1.83-.92 0 0-.4 1.53-.5 1.9-.18.69-.67 1.56-1 2.09.75.23 1.55.36 2.38.36 4.42 0 8-3.58 8-8s-3.58-8-8-8z"/>
+            </svg>
           </a>
+        {%- endif -%}
+
+        {%- if settings.social_twitter_link != blank -%}
+          <a href="{{ settings.social_twitter_link }}" aria-label="Twitter" target="_blank" rel="noopener noreferrer">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M18.89 5.13c-.65.29-1.35.49-2.08.58.75-.45 1.32-1.16 1.59-2-.7.42-1.47.72-2.29.88-.66-.7-1.6-1.14-2.64-1.14-2 0-3.62 1.62-3.62 3.62 0 .28.03.56.09.83-3.01-.15-5.68-1.59-7.46-3.78-.31.53-.49 1.16-.49 1.82 0 1.26.64 2.37 1.61 3.02-.59-.02-1.15-.18-1.64-.45v.05c0 1.75 1.25 3.21 2.91 3.54-.3.08-.62.13-.95.13-.23 0-.46-.02-.68-.07.46 1.44 1.8 2.48 3.38 2.51-1.24.97-2.8 1.55-4.5 1.55-.29 0-.58-.02-.86-.05 1.6 1.03 3.5 1.63 5.54 1.63 6.65 0 10.29-5.51 10.29-10.29 0-.16 0-.31-.01-.47.71-.51 1.32-1.15 1.81-1.88z"/>
+            </svg>
+          </a>
+        {%- endif -%}
+        
+        {%- if settings.social_facebook_link != blank -%}
+           <a href="{{ settings.social_facebook_link }}" aria-label="Facebook" target="_blank" rel="noopener noreferrer">
+             <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M18 10c0-4.418-3.582-8-8-8S2 5.582 2 10c0 3.99 2.94 7.293 6.75 7.904v-5.592H6.719V10h2.031V8.237c0-2.005 1.194-3.112 3.022-3.112.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.616-1.303 1.258V10h2.219l-.355 2.312H11.25v5.592C15.06 17.293 18 13.99 18 10z"/></svg>
+           </a>
         {%- endif -%}
       </div>
     </div>
   </div>
 </footer>
-
-{% stylesheet %}
-  .site-footer {
-    padding: 80px 0 32px;
-    margin-top: auto;
-  }
-
-  .site-footer__grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 48px;
-    margin-bottom: 80px;
-  }
-
-  @media screen and (min-width: 990px) {
-    .site-footer__grid {
-      grid-template-columns: 2fr 1fr 1fr 1fr; /* Matches the 2fr for newsletter + 3 links columns */
-      gap: 32px;
-    }
-  }
-
-  /* Newsletter Column */
-  .site-footer__newsletter {
-    background-color: rgba(255, 255, 255, 0.05);
-    padding: 32px;
-    border-radius: 4px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  .site-footer__newsletter h3 {
-    font-family: var(--font-display);
-    font-size: 1.5rem;
-    font-weight: 300;
-    margin-bottom: 16px;
-    color: inherit;
-  }
-
-  .site-footer__newsletter p {
-    margin-bottom: 24px;
-    opacity: 0.7;
-    line-height: 1.5;
-  }
-
-  /* Newsletter Form */
-  .newsletter-form {
-    display: flex;
-    position: relative;
-    max-width: 400px;
-  }
-
-  .newsletter-form__input {
-    flex: 1;
-    padding: 14px 16px;
-    background-color: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: inherit;
-    border-radius: 2px;
-    width: 100%;
-  }
-  
-  .newsletter-form__input::placeholder {
-    color: inherit;
-    opacity: 0.6;
-  }
-
-  .newsletter-form__submit {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 48px;
-    padding: 14px;
-    border: none;
-    border-radius: 2px;
-    cursor: pointer;
-    margin-left: 8px;
-    transition: opacity 0.2s ease;
-  }
-
-  .newsletter-form__submit:hover {
-    opacity: 0.9;
-  }
-
-  /* Messages */
-  .newsletter-form__message {
-    font-size: 13px;
-    margin-top: 10px;
-    display: block;
-  }
-  .newsletter-form__message.success { color: #8B7355; }
-  .newsletter-form__message.error { color: #FF6B6B; }
-
-  /* Links Columns */
-  .site-footer__links h4 {
-    font-family: var(--font-body);
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    margin-bottom: 24px;
-    opacity: 0.9;
-  }
-
-  .site-footer__links ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .site-footer__links a {
-    color: inherit;
-    text-decoration: none;
-    opacity: 0.7;
-    font-size: 14px;
-    transition: color 0.2s ease;
-  }
-
-  /* Bottom Bar */
-  .site-footer__bottom {
-    padding-top: 32px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-    align-items: center;
-    text-align: center;
-  }
-
-  @media screen and (min-width: 768px) {
-    .site-footer__bottom {
-      flex-direction: row;
-      justify-content: space-between;
-      text-align: left;
-    }
-  }
-
-  .site-footer__copyright {
-    font-size: 14px;
-    opacity: 0.6;
-  }
-
-  .site-footer__social {
-    display: flex;
-    gap: 16px;
-  }
-
-  .site-footer__social a {
-    color: inherit;
-    opacity: 0.7;
-    transition: opacity 0.2s ease;
-  }
-
-  .site-footer__social a:hover {
-    opacity: 1;
-  }
-
-  .site-footer__legal {
-    display: flex;
-    gap: 24px;
-  }
-
-  .site-footer__legal a {
-    font-size: 14px;
-    color: inherit;
-    text-decoration: none;
-    opacity: 0.6;
-    transition: color 0.2s ease;
-  }
-{% endstylesheet %}
 
 {% schema %}
 {
@@ -331,7 +178,7 @@
     {
       "type": "textarea",
       "id": "newsletter_text",
-      "label": "Text",
+      "label": "Subtext",
       "default": "Subscribe to receive updates on new arrivals, exclusive offers, and editorial content."
     },
     {
@@ -341,28 +188,24 @@
     {
       "type": "link_list",
       "id": "menu_1",
-      "label": "Shop Menu",
+      "label": "Menu 1 (Shop)",
       "default": "main-menu"
     },
     {
       "type": "link_list",
       "id": "menu_2",
-      "label": "About Menu"
+      "label": "Menu 2 (About)"
     },
     {
       "type": "link_list",
       "id": "menu_3",
-      "label": "Help Menu"
-    },
-    {
-      "type": "header",
-      "content": "Legal"
+      "label": "Menu 3 (Help)"
     },
     {
       "type": "link_list",
       "id": "legal_menu",
-      "label": "Legal Links Menu",
-      "info": "Create a menu with Privacy Policy, Terms, etc."
+      "label": "Legal Menu (Bottom)",
+      "info": "Links for Privacy Policy, Terms, etc."
     },
     {
       "type": "header",
@@ -389,3 +232,210 @@
   ]
 }
 {% endschema %}
+
+{% stylesheet %}
+  /* ========================================
+     FOOTER STYLES
+     ======================================== */
+
+  .site-footer {
+    background-color: var(--color-black);
+    color: var(--color-white);
+    padding: var(--spacing-2xl) 0 var(--spacing-lg);
+  }
+
+  .site-footer::before {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      var(--color-primary) 20%,
+      var(--color-primary-hover) 50%,
+      var(--color-primary) 80%,
+      transparent 100%
+    );
+    margin-bottom: var(--spacing-2xl);
+  }
+
+  .site-footer__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-xl);
+    margin-bottom: var(--spacing-2xl);
+  }
+
+  @media screen and (min-width: 990px) {
+    .site-footer__grid {
+      grid-template-columns: 2fr repeat(3, 1fr);
+    }
+  }
+
+  .site-footer__newsletter {
+    background-color: rgba(233, 245, 255, 0.05);
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(233, 245, 255, 0.1);
+  }
+
+  .site-footer__newsletter h3 {
+    font-size: 1.5rem; /* text-2xl approx */
+    font-weight: 300;
+    margin-bottom: var(--spacing-sm);
+    color: var(--color-white);
+  }
+
+  .site-footer__newsletter p {
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .newsletter-form {
+    display: flex;
+    gap: var(--spacing-xs);
+    max-width: 400px;
+    flex-wrap: wrap; /* Ensure error messages break to new line */
+  }
+
+  .newsletter-form__input {
+    flex: 1;
+    padding: 14px 16px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(233, 245, 255, 0.2);
+    color: var(--color-white);
+    border-radius: var(--radius-sm);
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+    width: 100%;
+  }
+
+  .newsletter-form__input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .newsletter-form__input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    background-color: rgba(233, 245, 255, 0.08);
+  }
+
+  .newsletter-form__submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 48px;
+    padding: 14px 16px;
+    background-color: var(--color-primary);
+    color: var(--color-black);
+    border-radius: var(--radius-sm);
+    border: none;
+    cursor: pointer;
+    transition: transform 0.15s ease, background-color 0.15s ease;
+  }
+
+  .newsletter-form__submit:hover {
+    transform: translateX(4px);
+    background-color: var(--color-primary-hover);
+  }
+
+  .newsletter-form__message {
+    width: 100%;
+    margin-top: var(--spacing-sm);
+    font-size: 14px;
+    display: none;
+  }
+  
+  .newsletter-form__message.visible { display: block; }
+  .newsletter-form__message.success { color: var(--color-primary); }
+  .newsletter-form__message.error { color: #ff6b6b; }
+
+  /* Links Columns */
+  .site-footer__links h4 {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.15em; /* tracking-wider */
+    margin-bottom: var(--spacing-sm);
+    color: var(--color-white);
+  }
+
+  .site-footer__links ul {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .site-footer__links a {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .site-footer__links a:hover {
+    color: var(--color-white);
+  }
+
+  /* Bottom Bar */
+  .site-footer__bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    flex-direction: column;
+    gap: var(--spacing-md);
+    text-align: center;
+  }
+
+  @media screen and (min-width: 768px) {
+    .site-footer__bottom {
+      flex-direction: row;
+      text-align: left;
+    }
+  }
+
+  .site-footer__copyright {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .site-footer__legal {
+    display: flex;
+    gap: var(--spacing-md);
+  }
+
+  .site-footer__legal a {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .site-footer__legal a:hover {
+    color: var(--color-white);
+  }
+
+  .site-footer__social {
+    display: flex;
+    gap: var(--spacing-sm);
+  }
+
+  .site-footer__social a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    min-height: 40px;
+    color: rgba(255, 255, 255, 0.7);
+    transition: color 0.15s ease;
+  }
+
+  .site-footer__social a:hover {
+    color: var(--color-white);
+  }
+{% endstylesheet %}
