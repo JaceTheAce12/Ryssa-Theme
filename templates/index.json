@@ -17,7 +17,7 @@
         "image_desktop": "shopify://shop_images/a-hero-image-for-a-fashion-landing-page.png",
         "mobile_media_type": "image",
         "overlay_color": "#12121266",
-        "overlay_opacity": 30,
+        "overlay_opacity": 60,
         "show_accent_line": true,
         "eyebrow": "Spring 2026",
         "title": "Ethereal Minimalism",
