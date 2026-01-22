@@ -1,51 +1,59 @@
 {%- comment -%}
   ----------------------------------------------------------------------------------
-  RYSSA PRODUCT GRID
-  - Renamed classes to 'ryssa-*' to prevent theme conflicts
-  - Fully isolated styling
+  RYSSA LOOKBOOK GRID
+  - Style: Asymmetrical Masonry (12-column grid)
+  - Features: Editorial Badges, Captions, Featured Cards (Span 7 cols)
+  - Mobile: Stacks vertically for readability
   ----------------------------------------------------------------------------------
 {%- endcomment -%}
 
 <section class="ryssa-section section" data-section-id="{{ section.id }}">
   <div class="ryssa-container">
     
-    {%- if section.settings.title != blank or section.settings.eyebrow != blank -%}
-      <header class="ryssa-section-header fade-in">
-        {%- if section.settings.eyebrow != blank -%}
-          <span class="ryssa-eyebrow">{{ section.settings.eyebrow }}</span>
-        {%- endif -%}
-        {%- if section.settings.title != blank -%}
-          <h2 class="ryssa-section-title">{{ section.settings.title }}</h2>
-        {%- endif -%}
-      </header>
-    {%- endif -%}
+    <header class="ryssa-section-header fade-in">
+      {%- if section.settings.eyebrow != blank -%}
+        <span class="ryssa-eyebrow">{{ section.settings.eyebrow }}</span>
+      {%- endif -%}
+      {%- if section.settings.title != blank -%}
+        <h2 class="ryssa-section-title">{{ section.settings.title }}</h2>
+      {%- endif -%}
+      {%- if section.settings.intro != blank -%}
+        <p class="ryssa-section-intro">{{ section.settings.intro }}</p>
+      {%- endif -%}
+    </header>
 
-    <div class="ryssa-grid__items">
+    <div class="ryssa-lookbook-grid">
       {%- assign collection = section.settings.collection -%}
       {%- assign limit = section.settings.products_to_show -%}
 
       {%- if collection != blank and collection.products_count > 0 -%}
         {%- for product in collection.products limit: limit -%}
-          <article class="ryssa-card fade-in">
+          
+          {%- comment -%} Detect "Featured" tag for large layout {%- endcomment -%}
+          {%- assign is_featured = false -%}
+          {%- if product.tags contains 'featured' or product.tags contains 'Featured' -%}
+            {%- assign is_featured = true -%}
+          {%- endif -%}
+
+          <article class="ryssa-card {% if is_featured %}ryssa-card--featured{% endif %} fade-in">
             <a href="{{ product.url }}" class="ryssa-card__link">
               
               <div class="ryssa-card__image-wrapper">
-                {%- comment -%} Badge Logic {%- endcomment -%}
-                {%- if product.available == false -%}
+                {%- comment -%} BADGES {%- endcomment -%}
+                {%- if is_featured -%}
+                  <span class="ryssa-card__badge ryssa-card__badge--editorial">Editor's Pick</span>
+                {%- elsif product.available == false -%}
                   <span class="ryssa-card__badge">Sold Out</span>
                 {%- elsif product.compare_at_price > product.price -%}
                   <span class="ryssa-card__badge">Sale</span>
-                {%- elsif product.tags contains 'New' or product.tags contains 'new' -%}
-                  <span class="ryssa-card__badge">New</span>
                 {%- endif -%}
 
                 {%- if product.featured_media -%}
-                  {{ product.featured_media | image_url: width: 1000 | image_tag: 
+                  {{ product.featured_media | image_url: width: 1200 | image_tag: 
                     loading: 'lazy',
                     class: 'ryssa-card__image',
                     width: product.featured_media.width,
                     height: product.featured_media.height,
-                    sizes: '(min-width: 990px) 25vw, (min-width: 750px) 33vw, 50vw',
                     alt: product.title | escape
                   }}
                 {%- else -%}
@@ -55,16 +63,24 @@
 
               <div class="ryssa-card__info">
                 <h3 class="ryssa-card__title">{{ product.title }}</h3>
-                <div class="ryssa-card__price">
+                
+                {%- comment -%} Caption: Uses Vendor or "Editorial Selection" {%- endcomment -%}
+                <p class="ryssa-card__caption">
+                  {% if product.metafields.descriptors.subtitle != blank %}
+                    {{ product.metafields.descriptors.subtitle }}
+                  {% else %}
+                    {{ product.vendor }}
+                  {% endif %}
+                </p>
+                
+                <p class="ryssa-card__price">
                   {%- if product.compare_at_price > product.price -%}
-                    <span class="visually-hidden">Regular price</span>
-                    <s style="color: var(--color-text-secondary); margin-right: 5px;">{{ product.compare_at_price | money }}</s>
-                    <span class="visually-hidden">Sale price</span>
+                    <s style="opacity: 0.6; margin-right: 5px;">{{ product.compare_at_price | money }}</s>
                     {{ product.price | money }}
                   {%- else -%}
                     {{ product.price | money }}
                   {%- endif -%}
-                </div>
+                </p>
               </div>
             </a>
           </article>
@@ -73,15 +89,21 @@
       {%- else -%}
         {%- comment -%} EMPTY STATE {%- endcomment -%}
         {%- for i in (1..limit) -%}
-          <article class="ryssa-card fade-in">
+          {%- assign is_featured = false -%}
+          {%- if i == 1 or i == 4 -%}{%- assign is_featured = true -%}{%- endif -%}
+          
+          <article class="ryssa-card {% if is_featured %}ryssa-card--featured{% endif %} fade-in">
             <a href="#" class="ryssa-card__link">
               <div class="ryssa-card__image-wrapper">
-                <span class="ryssa-card__badge">New</span>
+                {%- if is_featured -%}
+                  <span class="ryssa-card__badge ryssa-card__badge--editorial">Editor's Pick</span>
+                {%- endif -%}
                 {%- capture placeholder_index -%}{% cycle 1, 2, 3, 4, 5, 6 %}{%- endcapture -%}
                 {{ 'product-' | append: placeholder_index | placeholder_svg_tag: 'ryssa-card__image placeholder-svg' }}
               </div>
               <div class="ryssa-card__info">
-                <h3 class="ryssa-card__title">Example Product {{ i }}</h3>
+                <h3 class="ryssa-card__title">Lookbook Item {{ i }}</h3>
+                <p class="ryssa-card__caption">Curated Selection</p>
                 <p class="ryssa-card__price">{{ 19900 | money }}</p>
               </div>
             </a>
@@ -94,9 +116,28 @@
 
 {% stylesheet %}
   /* ========================================
-     RYSSA ISOLATED GRID STYLES
+     RYSSA EDITORIAL LOOKBOOK CSS
+     (Scoped to avoid theme conflicts)
      ======================================== */
   
+  .ryssa-section {
+    --color-ivory: #F8F6F3;
+    --color-blush: #E3DAC9;
+    --color-gold: #8B7355; 
+    --color-charcoal: #3A3632;
+    --color-text-secondary: #525252;
+    --font-editorial: 'Playfair Display', serif;
+    --font-body: 'Inter', sans-serif;
+    
+    --spacing-xs: 8px;
+    --spacing-sm: 16px;
+    --spacing-md: 24px;
+    --spacing-xl: 48px;
+    --spacing-2xl: 80px;
+    
+    padding: 80px 0;
+  }
+
   .ryssa-container {
     width: 100%;
     max-width: 1440px;
@@ -104,9 +145,13 @@
     padding: 0 24px;
   }
 
+  /* --- HEADER --- */
   .ryssa-section-header {
     text-align: center;
-    margin-bottom: 48px; /* Spacing-2xl */
+    margin-bottom: 64px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .ryssa-eyebrow {
@@ -116,113 +161,195 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.15em;
-    color: #525252;
+    color: var(--color-text-secondary);
     margin-bottom: 16px;
   }
 
   .ryssa-section-title {
-    font-family: var(--font-display);
-    font-size: clamp(2rem, 4vw, 3.052rem); /* text-4xl */
+    font-family: var(--font-editorial);
+    font-size: clamp(2rem, 4vw, 3.052rem);
     font-weight: 300;
-    margin: 0;
+    margin: 0 0 16px 0;
+    color: var(--color-charcoal);
   }
 
-  /* --- GRID --- */
-  .ryssa-grid__items {
+  .ryssa-section-intro {
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+  }
+
+  /* --- GRID SYSTEM --- */
+  .ryssa-lookbook-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 48px 24px; /* Row gap, Col gap */
+    grid-template-columns: repeat(12, 1fr);
+    gap: var(--spacing-xl);
+    margin-top: var(--spacing-2xl);
   }
 
-  /* --- CARD --- */
+  /* --- CARD LAYOUTS --- */
+  
+  /* Standard Cards (Span 5) */
   .ryssa-card {
     display: block;
     position: relative;
+    grid-column: span 5; /* From CSS provided */
   }
 
+  /* Featured Cards (Span 7) */
+  .ryssa-card--featured {
+    grid-column: span 7; /* From CSS provided */
+  }
+
+  /* Offset Pattern (Desktop Only) */
+  @media screen and (min-width: 990px) {
+    .ryssa-lookbook-grid .ryssa-card:nth-child(2) {
+      margin-top: var(--spacing-2xl);
+    }
+    .ryssa-lookbook-grid .ryssa-card:nth-child(3) {
+      margin-top: calc(-1 * var(--spacing-xl));
+    }
+    .ryssa-lookbook-grid .ryssa-card:nth-child(5) {
+      margin-top: var(--spacing-xl);
+    }
+  }
+
+  /* --- CARD STYLING --- */
   .ryssa-card__link {
     display: block;
     text-decoration: none;
     color: inherit;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @media (hover: hover) {
+    .ryssa-card:hover .ryssa-card__link {
+      transform: translateY(-4px);
+    }
   }
 
   .ryssa-card__image-wrapper {
     position: relative;
     aspect-ratio: 3 / 4;
-    margin-bottom: 16px;
+    margin-bottom: var(--spacing-md);
     overflow: hidden;
-    background-color: #F8F6F3;
+    background-color: var(--color-ivory);
+    border-radius: 2px;
   }
 
   .ryssa-card__image {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     display: block;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   }
-
+  
   .ryssa-card__image svg {
     background: #f0f0f0;
+  }
+
+  @media (hover: hover) {
+    .ryssa-card:hover .ryssa-card__image-wrapper {
+      background-color: var(--color-blush);
+    }
+    .ryssa-card:hover .ryssa-card__image {
+      transform: scale(1.03);
+    }
   }
 
   /* --- BADGE --- */
   .ryssa-card__badge {
     position: absolute;
-    top: 16px;
-    left: 16px;
-    padding: 6px 12px;
-    font-size: 11px;
+    top: var(--spacing-md);
+    left: var(--spacing-md);
+    padding: 8px 16px;
+    font-family: var(--font-body);
+    font-size: 10px;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.15em;
-    background-color: #e9f5ff; /* Primary pale blue */
-    color: #1A1A1A;
-    border-radius: 2px;
+    letter-spacing: 0.1em;
+    background-color: #FFFFFF;
+    color: var(--color-charcoal);
+    border: 1px solid var(--color-gold);
     z-index: 2;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    transition: transform 0.15s ease;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease;
+  }
+
+  .ryssa-card__badge--editorial {
+    background-color: var(--color-gold);
+    color: #FFFFFF;
+    border-color: var(--color-gold);
+  }
+
+  @media (hover: hover) {
+    .ryssa-card:hover .ryssa-card__badge {
+      transform: translateY(-2px);
+    }
   }
 
   /* --- INFO --- */
   .ryssa-card__info {
-    text-align: center;
+    text-align: left;
+    padding: 0 4px;
   }
 
   .ryssa-card__title {
-    font-family: var(--font-body);
-    font-size: 1rem;
+    font-family: var(--font-editorial);
+    font-size: 1.25rem;
     font-weight: 400;
+    letter-spacing: 0.02em;
     margin: 0 0 8px 0;
-    line-height: 1.5;
-    color: #1A1A1A;
+    line-height: 1.3;
+    color: var(--color-charcoal);
+  }
+
+  .ryssa-card__caption {
+    font-family: var(--font-editorial);
+    font-style: italic;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+    margin: 0 0 8px 0;
+    max-width: 90%;
   }
 
   .ryssa-card__price {
     font-family: var(--font-body);
-    font-size: 1rem;
-    color: #525252;
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    color: var(--color-text-secondary);
+    margin-top: 12px;
   }
 
-  /* --- HOVER EFFECTS --- */
-  @media (hover: hover) {
-    .ryssa-card:hover .ryssa-card__image {
-      transform: scale(1.05);
-    }
-    
-    .ryssa-card:hover .ryssa-card__badge {
-      transform: scale(1.05);
-    }
-    
-    .ryssa-card__link:hover {
-      opacity: 1; /* Reset theme opacity if needed */
-    }
+  /* Featured Text sizing */
+  .ryssa-card--featured .ryssa-card__title {
+    font-size: 1.75rem;
   }
-  
-  /* --- MOBILE --- */
-  @media (max-width: 480px) {
-    .ryssa-grid__items {
-      grid-template-columns: 1fr;
+  .ryssa-card--featured .ryssa-card__caption {
+    font-size: 1rem;
+    max-width: 85%;
+  }
+
+  /* --- MOBILE RESPONSIVENESS --- */
+  @media (max-width: 989px) {
+    .ryssa-lookbook-grid {
+      grid-template-columns: 1fr; /* Stack vertically on mobile */
+      gap: 32px;
+    }
+    
+    .ryssa-card, 
+    .ryssa-card--featured {
+      grid-column: auto; /* Reset column spans */
+      width: 100%;
+    }
+    
+    /* Reset offsets */
+    .ryssa-lookbook-grid .ryssa-card:nth-child(n) {
+      margin-top: 0;
     }
   }
 {% endstylesheet %}
@@ -236,50 +363,41 @@
       const fadeElements = section.querySelectorAll('.fade-in');
       if (fadeElements.length === 0) return;
 
-      const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-      };
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 
-      if ('IntersectionObserver' in window) {
-        const observer = new IntersectionObserver((entries) => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              const target = entry.target;
-              // Add a small stagger effect based on index
-              const index = Array.from(fadeElements).indexOf(target);
-              setTimeout(() => {
-                target.classList.add('visible');
-              }, index * 50); // 50ms stagger
-              
-              observer.unobserve(target);
-            }
-          });
-        }, observerOptions);
-
-        fadeElements.forEach(el => observer.observe(el));
-      } else {
-        fadeElements.forEach(el => el.classList.add('visible'));
-      }
+      fadeElements.forEach(el => observer.observe(el));
     });
   })();
 </script>
 
 {% schema %}
 {
-  "name": "Ryssa Product Grid",
+  "name": "Ryssa Lookbook Grid",
   "settings": [
     {
       "type": "text",
       "id": "eyebrow",
       "label": "Eyebrow Text",
-      "default": "New Arrivals"
+      "default": "The Lookbook"
     },
     {
       "type": "text",
       "id": "title",
       "label": "Heading",
       "default": "Spring Essentials"
+    },
+    {
+      "type": "textarea",
+      "id": "intro",
+      "label": "Intro Text",
+      "default": "Curated pieces for the modern wardrobe, where every selection tells a story of elegance and restraint."
     },
     {
       "type": "collection",
@@ -289,16 +407,16 @@
     {
       "type": "range",
       "id": "products_to_show",
-      "min": 4,
+      "min": 3,
       "max": 12,
       "step": 1,
-      "default": 4,
-      "label": "Maximum products to show"
+      "default": 6,
+      "label": "Products to show"
     }
   ],
   "presets": [
     {
-      "name": "Ryssa Product Grid"
+      "name": "Ryssa Lookbook Grid"
     }
   ]
 }
