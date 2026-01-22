@@ -1,11 +1,18 @@
 {%- comment -%}
   ----------------------------------------------------------------------------------
   RYSSA HEADER - Custom Implementation
-  Replaces standard theme header with custom HTML structure.
   ----------------------------------------------------------------------------------
 {%- endcomment -%}
 
-<header class="site-header" data-section-id="{{ section.id }}" data-sticky="{{ section.settings.enable_sticky }}">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap');
+</style>
+
+<header 
+  class="site-header" 
+  data-section-id="{{ section.id }}" 
+  id="SiteHeader"
+>
   <div class="site-header__inner">
     
     <button class="site-header__menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-nav">
@@ -16,13 +23,12 @@
 
     <a href="{{ routes.root_url }}" class="site-header__logo" aria-label="{{ shop.name }}">
       {%- if section.settings.logo != blank -%}
-        {%- assign logo_height = section.settings.logo_width | divided_by: section.settings.logo.aspect_ratio -%}
+        {%- assign logo_alt = section.settings.logo.alt | default: shop.name | escape -%}
         {{ section.settings.logo | image_url: width: section.settings.logo_width | image_tag: 
           class: 'site-header__logo-image',
           widths: '50, 100, 150, 200, 250, 300, 400, 500',
-          height: logo_height,
-          width: section.settings.logo_width,
-          alt: section.settings.logo.alt | default: shop.name | escape
+          height: 'auto',
+          alt: logo_alt
         }}
       {%- else -%}
         <svg width="120" height="32" viewBox="0 0 120 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
@@ -35,7 +41,7 @@
       <ul class="site-header__menu">
         {%- for link in linklists[section.settings.menu].links -%}
           <li>
-            <a href="{{ link.url }}" {% if link.active %}aria-current="page"{% endif %}>
+            <a href="{{ link.url }}" class="{% if link.active %}active{% endif %}">
               {{ link.title }}
             </a>
           </li>
@@ -46,12 +52,12 @@
     <div class="site-header__actions">
       
       {%- if section.settings.show_search -%}
-        <a href="{{ routes.search_url }}" class="site-header__action-btn" aria-label="Search">
+        <button class="site-header__action-btn" aria-label="Search">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor">
             <circle cx="9" cy="9" r="6" stroke-width="1.5"/>
             <path d="M13.5 13.5L17 17" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
-        </a>
+        </button>
       {%- endif -%}
 
       {%- if shop.customer_accounts_enabled -%}
@@ -63,7 +69,7 @@
         </a>
       {%- endif -%}
 
-      <a href="{{ routes.cart_url }}" class="site-header__action-btn site-header__cart" id="cart-icon-bubble" aria-label="Cart">
+      <a href="{{ routes.cart_url }}" class="site-header__action-btn site-header__cart" aria-label="Cart">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor">
           <path d="M3 3H4.5L6.5 13H16.5L18.5 6H6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           <circle cx="7.5" cy="16.5" r="1" fill="currentColor"/>
@@ -78,11 +84,6 @@
 </header>
 
 <div class="mobile-nav-overlay" id="mobile-nav" aria-hidden="true">
-  <div class="mobile-nav__header">
-    <button class="site-header__menu-close" aria-label="Close menu">
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor"><path d="M15 5L5 15M5 5l10 10" stroke-width="1.5" stroke-linecap="round"/></svg>
-    </button>
-  </div>
   <nav class="mobile-nav" aria-label="Mobile navigation">
     <ul class="mobile-nav__menu">
       {%- for link in linklists[section.settings.menu].links -%}
@@ -127,13 +128,7 @@
     },
     {
       "type": "header",
-      "content": "Functionality"
-    },
-    {
-      "type": "checkbox",
-      "id": "enable_sticky",
-      "default": true,
-      "label": "Enable Sticky Header"
+      "content": "Options"
     },
     {
       "type": "checkbox",
@@ -146,124 +141,553 @@
 {% endschema %}
 
 {% stylesheet %}
-  /* ------------------------------------------------ */
-  /* PASTE YOUR CSS HERE                             */
-  /* ------------------------------------------------ */
-  
-  /* I have added some basic structural CSS so it isn't broken
-     until you paste your full CSS. */
+  /* ========================================
+     CSS CUSTOM PROPERTIES
+     ======================================== */
 
-  .site-header {
-    background: #fff;
-    padding: 1rem 2rem;
-    position: relative;
-    z-index: 100;
-  }
-  
-  /* Flex container for the header items */
-  .site-header__inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  :root {
+    /* Colors - Neutrals */
+    --color-white: #FFFFFF;
+    --color-cloud: #F8F6F3;
+    --color-sand: #E3DAC9;
+    --color-taupe: #CAB9A9;
+    --color-mocha: #A89788;
+    --color-charcoal: #3A3632;
+    --color-black: #1A1A1A;
+
+    /* Colors - Accent */
+    --color-accent-primary: #8B7355;
+    --color-accent-secondary: #2C3E50;
+
+    /* Colors - Primary Accent (Pale Blue) */
+    --color-primary: #e9f5ff;
+    --color-primary-hover: #d4ecff;
+    --color-primary-dark: #c0e3ff;
+
+    /* Colors - Semantic */
+    --color-text-primary: var(--color-black);
+    --color-text-secondary: #525252;
+    --color-background-primary: var(--color-white);
+    --color-background-secondary: var(--color-cloud);
+
+    /* Typography - Fonts */
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+
+    /* Typography - Type Scale (1.250 - Major Third) */
+    --text-base: 1rem;      /* 16px */
+    --text-lg: 1.25rem;     /* 20px */
+    --text-xl: 1.563rem;    /* 25px */
+    --text-2xl: 1.953rem;   /* 31.25px */
+    --text-3xl: 2.441rem;   /* 39px */
+    --text-4xl: 3.052rem;   /* 48.83px */
+    --text-5xl: 3.815rem;   /* 61.04px */
+
+    /* Typography - Font Weights */
+    --font-light: 300;
+    --font-regular: 400;
+    --font-medium: 500;
+    --font-semibold: 600;
+
+    /* Typography - Line Heights */
+    --leading-tight: 1.2;
+    --leading-normal: 1.5;
+    --leading-relaxed: 1.6;
+
+    /* Typography - Letter Spacing */
+    --tracking-tight: -0.02em;
+    --tracking-normal: 0;
+    --tracking-wide: 0.1em;
+    --tracking-wider: 0.15em;
+
+    /* Layout - Grid System */
+    --grid-columns: 12;
+    --grid-gap: 24px;
+    --content-max-width: 1440px;
+
+    /* Layout - Spacing */
+    --spacing-xs: 8px;
+    --spacing-sm: 16px;
+    --spacing-md: 24px;
+    --spacing-lg: 32px;
+    --spacing-xl: 48px;
+    --spacing-2xl: 80px;
+    --spacing-3xl: 120px;
+    --spacing-4xl: 160px;
+
+    /* Animation - Easing */
+    --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-default: ease;
+
+    /* Animation - Duration */
+    --duration-fast: 150ms;
+    --duration-base: 300ms;
+    --duration-slow: 600ms;
+
+    /* Shadows */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
+
+    /* Border Radius */
+    --radius-sm: 2px;
+    --radius-md: 4px;
+    --radius-lg: 8px;
+
+    /* Border Colors */
+    --color-border-light: #E8E8E8;
+    --color-border-subtle: rgba(0, 0, 0, 0.08);
   }
 
-  /* Navigation Layout */
-  .site-header__menu {
-    display: flex;
-    gap: 2rem;
-    list-style: none;
+
+  /* ========================================
+     CSS RESET & BASE STYLES
+     ======================================== */
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
   }
 
-  .site-header__menu a {
-    text-decoration: none;
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    font-weight: var(--font-regular);
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-primary);
+    background-color: var(--color-background-primary);
+    overflow-x: hidden;
+  }
+
+  img,
+  picture,
+  video,
+  canvas,
+  svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  img {
+    height: auto;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+
+  a {
     color: inherit;
-    text-transform: uppercase;
-    font-size: 0.9rem;
-    letter-spacing: 0.05em;
+    text-decoration: none;
   }
 
-  /* Actions Layout */
-  .site-header__actions {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
+  ul,
+  ol {
+    list-style: none;
   }
 
-  .cart-count {
-    font-size: 0.75rem;
-    margin-left: 5px;
-  }
-
-  /* Mobile Toggle Logic (Hidden on Desktop) */
-  .site-header__menu-toggle {
-    display: none; 
+  button {
     background: none;
     border: none;
     cursor: pointer;
   }
-  
-  .mobile-nav-overlay {
-    display: none; /* Hide by default */
+
+
+  /* ========================================
+     TYPOGRAPHY
+     ======================================== */
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+    font-weight: var(--font-light);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
+    margin-bottom: 0.5em;
   }
 
-  /* Responsive Breakpoint (Matches typical Shopify breakpoint) */
-  @media screen and (max-width: 989px) {
-    .site-header__nav { display: none; } /* Hide Desktop Menu */
-    .site-header__menu-toggle { display: block; } /* Show Toggle */
-    
-    .mobile-nav-overlay {
-      position: fixed;
-      top: 0; left: 0; bottom: 0;
-      width: 80%;
-      background: white;
-      z-index: 200;
-      transform: translateX(-100%);
-      transition: transform 0.3s ease;
-      padding: 2rem;
-      border-right: 1px solid #eee;
-      display: block; /* Visible in DOM, but pushed off screen */
+  h1 {
+    font-size: clamp(2.5rem, 6vw, var(--text-5xl));
+  }
+
+  h2 {
+    font-size: clamp(2rem, 4vw, var(--text-4xl));
+  }
+
+  h3 {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-medium);
+    letter-spacing: var(--tracking-normal);
+  }
+
+  h4 {
+    font-size: var(--text-lg);
+    font-weight: var(--font-medium);
+  }
+
+  p {
+    margin-bottom: 1em;
+  }
+
+  p:last-child {
+    margin-bottom: 0;
+  }
+
+  .eyebrow {
+    display: block;
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: var(--font-semibold);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wider);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-sm);
+    transition: color var(--duration-fast) var(--ease-default);
+  }
+
+  .fade-in.visible .eyebrow {
+    color: var(--color-accent-primary);
+  }
+
+
+  /* ========================================
+     LAYOUT UTILITIES
+     ======================================== */
+
+  .container {
+    width: 100%;
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
+  }
+
+  .section {
+    padding-block: clamp(var(--spacing-2xl), 12vw, var(--spacing-4xl));
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: var(--spacing-2xl);
+  }
+
+  .section-title {
+    font-weight: var(--font-regular);
+  }
+
+
+  /* ========================================
+     SITE HEADER
+     ======================================== */
+
+  .site-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background-color: var(--color-white);
+    border-bottom: 1px solid var(--color-border-light);
+    transition: transform var(--duration-base) var(--ease-default);
+  }
+
+  .site-header--hidden {
+    transform: translateY(-100%);
+  }
+
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 80px;
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
+  }
+
+  .site-header__logo svg {
+    display: block;
+    color: var(--color-black);
+    transition: opacity var(--duration-fast) var(--ease-default);
+  }
+
+  .site-header__logo:hover svg {
+    opacity: 0.7;
+  }
+
+  /* Desktop Navigation */
+  .site-header__nav {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .site-header__menu {
+    display: flex;
+    gap: var(--spacing-xl);
+  }
+
+  .site-header__menu a {
+    font-size: 14px;
+    font-weight: var(--font-medium);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    transition: color var(--duration-fast) var(--ease-default);
+    position: relative;
+  }
+
+  .site-header__menu a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: var(--color-primary-hover);
+    transition: width var(--duration-base) var(--ease-smooth);
+  }
+
+  .site-header__menu a:hover,
+  .site-header__menu a.active {
+    color: var(--color-accent-primary);
+  }
+
+  .site-header__menu a:hover::after,
+  .site-header__menu a.active::after {
+    width: 100%;
+  }
+
+  .site-header__menu a:active {
+    color: var(--color-charcoal);
+  }
+
+  /* Mobile Menu Toggle */
+  .site-header__menu-toggle {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    padding: 8px;
+    min-width: 44px;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .site-header__menu-toggle span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background-color: var(--color-black);
+    transition: all var(--duration-base) var(--ease-smooth);
+  }
+
+  .site-header__menu-toggle[aria-expanded="true"] span:nth-child(1) {
+    transform: rotate(45deg) translateY(7px);
+  }
+
+  .site-header__menu-toggle[aria-expanded="true"] span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .site-header__menu-toggle[aria-expanded="true"] span:nth-child(3) {
+    transform: rotate(-45deg) translateY(-7px);
+  }
+
+  /* Header Actions */
+  .site-header__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+  }
+
+  .site-header__action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    color: var(--color-black);
+    transition: opacity var(--duration-fast) var(--ease-default);
+  }
+
+  .site-header__action-btn:hover {
+    opacity: 0.6;
+  }
+
+  .site-header__action-btn:active {
+    opacity: 0.4;
+  }
+
+  .site-header__action-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .site-header__cart {
+    position: relative;
+  }
+
+  .cart-count {
+    position: absolute;
+    top: var(--spacing-xs);
+    right: var(--spacing-xs);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    font-size: 10px;
+    font-weight: var(--font-semibold);
+    color: var(--color-white);
+    background-color: var(--color-black);
+    border-radius: 50%;
+    line-height: 1;
+  }
+
+  /* Mobile Navigation Overlay */
+  .mobile-nav-overlay {
+    position: fixed;
+    top: 80px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--color-white);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--duration-base) var(--ease-default),
+               visibility var(--duration-base) var(--ease-default);
+  }
+
+  .mobile-nav-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .mobile-nav {
+    padding: var(--spacing-xl) var(--spacing-md);
+  }
+
+  .mobile-nav__menu {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+
+  .mobile-nav__menu a {
+    font-size: var(--text-xl);
+    font-family: var(--font-display);
+    font-weight: var(--font-light);
+    letter-spacing: var(--tracking-tight);
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid var(--color-border-subtle);
+    transition: color var(--duration-fast) var(--ease-default),
+               background-color var(--duration-fast) var(--ease-default);
+  }
+
+  .mobile-nav__menu a:hover,
+  .mobile-nav__menu a:focus-visible {
+    color: var(--color-accent-primary);
+    background-color: rgba(139, 115, 85, 0.08);
+  }
+
+  .mobile-nav__menu a:active {
+    background-color: rgba(139, 115, 85, 0.15);
+  }
+
+  /* ========================================
+     RESPONSIVE BREAKPOINTS
+     ======================================== */
+
+  /* Tablet (768px) */
+  @media (max-width: 768px) {
+    .container {
+      padding: 0 var(--spacing-md);
     }
 
-    .mobile-nav-overlay.is-open {
-      transform: translateX(0);
+    /* Header */
+    .site-header__nav {
+      display: none;
     }
-    
-    .mobile-nav__menu {
-      list-style: none;
-      padding: 0;
+
+    .site-header__menu-toggle {
+      display: flex;
     }
-    .mobile-nav__menu li {
-      margin-bottom: 1rem;
-    }
-    .mobile-nav__menu a {
-      text-decoration: none;
-      font-size: 1.2rem;
-      color: #000;
+
+    .site-header__logo {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
     }
   }
 {% endstylesheet %}
 
-
 <script>
-  // ------------------------------------------------
-  // PASTE YOUR JS HERE
-  // ------------------------------------------------
+document.addEventListener('DOMContentLoaded', function() {
+  
+  // ----------------------------------------------------
+  // 1. Mobile Menu Toggle
+  // ----------------------------------------------------
+  const toggleBtn = document.querySelector('.site-header__menu-toggle');
+  const navOverlay = document.querySelector('.mobile-nav-overlay');
+  
+  if (toggleBtn && navOverlay) {
+    toggleBtn.addEventListener('click', function() {
+      // Toggle ARIA state
+      const isExpanded = toggleBtn.getAttribute('aria-expanded') === 'true';
+      toggleBtn.setAttribute('aria-expanded', !isExpanded);
+      
+      // Toggle visibility class matching your CSS
+      navOverlay.classList.toggle('active');
+      
+      // Prevent background scrolling when menu is open
+      document.body.style.overflow = !isExpanded ? 'hidden' : '';
+    });
+  }
 
-  document.addEventListener('DOMContentLoaded', function() {
-    const toggle = document.querySelector('.site-header__menu-toggle');
-    const closeBtn = document.querySelector('.site-header__menu-close');
-    const mobileNav = document.getElementById('mobile-nav');
+  // ----------------------------------------------------
+  // 2. Sticky Header Scroll Behavior
+  // Matches CSS class: .site-header--hidden
+  // ----------------------------------------------------
+  let lastScrollTop = 0;
+  const header = document.getElementById('SiteHeader');
+  const scrollThreshold = 100; // Only hide after scrolling down this much
 
-    function toggleMenu() {
-      const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
-      toggle.setAttribute('aria-expanded', !isExpanded);
-      mobileNav.classList.toggle('is-open');
-      mobileNav.setAttribute('aria-hidden', isExpanded);
+  window.addEventListener('scroll', function() {
+    let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    
+    // Prevent negative scrolling (safari bounce)
+    if (scrollTop <= 0) {
+      header.classList.remove('site-header--hidden');
+      return;
     }
 
-    if(toggle) toggle.addEventListener('click', toggleMenu);
-    if(closeBtn) closeBtn.addEventListener('click', toggleMenu);
-  });
+    // Determine direction
+    if (scrollTop > lastScrollTop && scrollTop > scrollThreshold) {
+      // Scrolling DOWN
+      header.classList.add('site-header--hidden');
+    } else {
+      // Scrolling UP
+      header.classList.remove('site-header--hidden');
+    }
+    
+    lastScrollTop = scrollTop;
+  }, { passive: true });
+});
 </script>
