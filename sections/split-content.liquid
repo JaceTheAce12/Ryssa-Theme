@@ -1,18 +1,23 @@
 {%- comment -%}
   ----------------------------------------------------------------------------------
-  RYSSA SPLIT CONTENT SECTION
-  - Supports Image Left / Image Right layouts
-  - Custom color overrides via Schema
-  - Animations (Parallax + Fade In) enabled
+  RYSSA SPLIT CONTENT
+  - Layout: Image Left / Image Right
+  - Style: Custom Colors via Schema
+  - Features: Parallax Image & Fade-In Content
   ----------------------------------------------------------------------------------
 {%- endcomment -%}
 
 <style>
-  /* Scoped CSS variables for this specific section instance */
-  [data-section-id="{{ section.id }}"] {
-    --section-bg-color: {{ section.settings.bg_color }};
-    --section-text-color: {{ section.settings.text_color }};
-    --section-accent-color: {{ section.settings.accent_color }};
+  #shopify-section-{{ section.id }} .split-block {
+    background-color: {{ section.settings.bg_color }};
+    color: {{ section.settings.text_color }};
+  }
+  #shopify-section-{{ section.id }} .eyebrow,
+  #shopify-section-{{ section.id }} .arrow-link {
+    color: {{ section.settings.accent_color }};
+  }
+  #shopify-section-{{ section.id }} h2 {
+    color: {{ section.settings.text_color }};
   }
 </style>
 
@@ -23,11 +28,7 @@
   endif
 %}
 
-<section 
-  class="split-block {{ layout_class }}" 
-  data-section-id="{{ section.id }}"
-  style="background-color: var(--section-bg-color); color: var(--section-text-color);"
->
+<section class="split-block {{ layout_class }}" data-section-id="{{ section.id }}">
   
   <div class="split-block__image parallax-element">
     {%- if section.settings.image != blank -%}
@@ -45,21 +46,21 @@
 
   <div class="split-block__content fade-in">
     {%- if section.settings.eyebrow != blank -%}
-      <span class="eyebrow" style="color: var(--section-accent-color)">{{ section.settings.eyebrow }}</span>
+      <span class="eyebrow">{{ section.settings.eyebrow }}</span>
     {%- endif -%}
 
     {%- if section.settings.title != blank -%}
-      <h2 style="color: var(--section-text-color)">{{ section.settings.title }}</h2>
+      <h2>{{ section.settings.title }}</h2>
     {%- endif -%}
 
     {%- if section.settings.text != blank -%}
-      <div class="rte" style="color: var(--section-text-color); opacity: 0.8;">
+      <div class="rte">
         {{ section.settings.text }}
       </div>
     {%- endif -%}
 
     {%- if section.settings.link_text != blank and section.settings.link_url != blank -%}
-      <a href="{{ section.settings.link_url }}" class="arrow-link" style="color: var(--section-accent-color)">
+      <a href="{{ section.settings.link_url }}" class="arrow-link">
         <span>{{ section.settings.link_text }}</span>
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
           <path d="M4 10H16M16 10L11 5M16 10L11 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -105,7 +106,7 @@
       "type": "richtext",
       "id": "text",
       "label": "Description",
-      "default": "<p>Discover pieces designed for the modern wardrobe, where simplicity meets sophistication. Each garment is crafted with intention.</p>"
+      "default": "<p>Discover pieces designed for the modern wardrobe, where simplicity meets sophistication.</p>"
     },
     {
       "type": "text",
@@ -120,7 +121,7 @@
     },
     {
       "type": "header",
-      "content": "Layout & Design"
+      "content": "Layout & Colors"
     },
     {
       "type": "select",
@@ -147,26 +148,13 @@
     {
       "type": "color",
       "id": "accent_color",
-      "label": "Accent Color (Eyebrow/Link)",
+      "label": "Accent Color",
       "default": "#8B7355"
     }
   ],
   "presets": [
     {
-      "name": "Split Content Block",
-      "settings": {
-        "title": "Timeless Elegance",
-        "layout": "image_left"
-      }
-    },
-    {
-      "name": "Split Content (Reverse)",
-      "settings": {
-        "title": "Artisanal Quality",
-        "layout": "image_right",
-        "bg_color": "#e9f5ff",
-        "accent_color": "#2C3E50"
-      }
+      "name": "Split Content Block"
     }
   ]
 }
@@ -174,7 +162,7 @@
 
 {% stylesheet %}
   /* ========================================
-     SPLIT CONTENT CSS
+     SPLIT CONTENT BLOCK CSS
      ======================================== */
 
   .split-block {
@@ -185,20 +173,10 @@
     overflow: hidden;
   }
 
-  @media screen and (min-width: 768px) {
-    .split-block {
-      grid-template-columns: 1fr 1fr;
-      min-height: 80vh;
-    }
-  }
-
-  /* --- Image Side --- */
   .split-block__image {
     position: relative;
     overflow: hidden;
-    min-height: 400px;
-    width: 100%;
-    height: 100%;
+    min-height: 400px; /* Mobile minimum height */
   }
 
   .split-block__image img,
@@ -207,12 +185,10 @@
     height: 100%;
     object-fit: cover;
     display: block;
-    position: absolute;
-    top: 0; 
-    left: 0;
+    position: absolute; /* Essential for parallax */
+    top: 0; left: 0;
   }
 
-  /* --- Content Side --- */
   .split-block__content {
     display: flex;
     flex-direction: column;
@@ -220,69 +196,41 @@
     padding: 48px 24px; /* spacing-2xl spacing-md */
   }
 
-  @media screen and (min-width: 1024px) {
-    .split-block__content {
-      padding: 120px; /* spacing-3xl */
-    }
-  }
-
   .split-block__content h2 {
-    font-family: var(--font-display, 'Playfair Display', serif);
-    font-size: clamp(2rem, 4vw, 3.052rem);
+    font-family: var(--font-display);
     font-weight: 300;
     line-height: 1.2;
     margin-bottom: 24px;
+    font-size: clamp(2rem, 4vw, 3.052rem);
   }
 
   .split-block__content p {
-    margin-bottom: 1em;
+    color: inherit;
+    opacity: 0.8;
     max-width: 540px;
-    font-size: 1rem;
-    line-height: 1.6;
+    margin-bottom: 1em;
   }
 
   .split-block__content .arrow-link {
-    margin-top: 32px;
+    margin-top: 32px; /* spacing-lg */
   }
 
-  /* --- Styles for Layouts --- */
-  
-  /* Reverse Layout (Image Right) */
-  @media screen and (min-width: 768px) {
-    .split-block--reverse .split-block__image {
-      order: 2;
-    }
-    .split-block--reverse .split-block__content {
-      order: 1;
-    }
-  }
-
-  /* --- Components (Eyebrow & Link) --- */
-  .eyebrow {
-    display: block;
-    font-family: var(--font-body, sans-serif);
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    margin-bottom: 16px;
-  }
-
+  /* --- Styles for Arrow Link --- */
   .arrow-link {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 8px; /* spacing-xs */
     font-size: 14px;
     font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.1em; /* tracking-wide */
+    transition: gap 0.3s cubic-bezier(0.16, 1, 0.3, 1), color 0.15s ease;
     text-decoration: none;
-    transition: gap 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
   }
 
   .arrow-link:hover {
-    gap: 16px;
-    opacity: 0.7;
+    gap: 16px; /* spacing-sm */
+    opacity: 0.8;
   }
 
   .arrow-link svg {
@@ -292,38 +240,104 @@
   .arrow-link:hover svg {
     transform: translateX(4px);
   }
+
+  /* --- Responsive Layouts --- */
+  @media screen and (min-width: 768px) {
+    .split-block {
+      grid-template-columns: 1fr 1fr;
+      min-height: 80vh;
+    }
+    
+    .split-block__content {
+      padding: 80px 48px;
+    }
+
+    /* Reverse Layout */
+    .split-block--reverse {
+      direction: rtl;
+    }
+    
+    .split-block--reverse > * {
+      direction: ltr;
+    }
+  }
+
+  @media screen and (min-width: 1024px) {
+    .split-block__content {
+      padding: 120px; /* spacing-3xl */
+    }
+  }
 {% endstylesheet %}
 
 <script>
   (function() {
-    // Simple Parallax & Fade Observer for this section
-    document.addEventListener('DOMContentLoaded', function() {
-      const section = document.querySelector('[data-section-id="{{ section.id }}"]');
-      if(!section) return;
+    // Scoped JS for this specific section type
+    
+    const initSection = (section) => {
+      if (!section) return;
 
-      // Fade In
+      // 1. FADE IN OBSERVER
       const fadeElements = section.querySelectorAll('.fade-in');
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-            observer.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.1 });
-      fadeElements.forEach(el => observer.observe(el));
+      if (fadeElements.length > 0) {
+        if ('IntersectionObserver' in window) {
+          const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                observer.unobserve(entry.target);
+              }
+            });
+          }, { threshold: 0.1 });
+          fadeElements.forEach(el => observer.observe(el));
+        } else {
+          fadeElements.forEach(el => el.classList.add('visible'));
+        }
+      }
 
-      // Parallax (Simple version)
-      const parallaxEl = section.querySelector('.parallax-element img');
-      if(parallaxEl && window.matchMedia('(min-width: 768px)').matches) {
-        window.addEventListener('scroll', () => {
-          const rect = section.getBoundingClientRect();
-          if(rect.top < window.innerHeight && rect.bottom > 0) {
-            const speed = 0.1; 
-            const yPos = (window.scrollY - section.offsetTop) * speed;
-            parallaxEl.style.transform = `translateY(${yPos}px)`;
+      // 2. PARALLAX EFFECT
+      // Only active on desktop/tablet to match your CSS media queries
+      const parallaxContainer = section.querySelector('.parallax-element');
+      const parallaxImg = section.querySelector('.parallax-element img, .parallax-element svg');
+      
+      if (parallaxContainer && parallaxImg && window.matchMedia('(min-width: 768px)').matches) {
+        
+        // Ensure image is tall enough for parallax
+        parallaxImg.style.height = '120%'; 
+        parallaxImg.style.top = '-10%';
+
+        const onScroll = () => {
+          const rect = parallaxContainer.getBoundingClientRect();
+          const viewportHeight = window.innerHeight;
+
+          // If in view
+          if (rect.top < viewportHeight && rect.bottom > 0) {
+            const speed = 0.15; // Parallax intensity
+            const center = viewportHeight / 2;
+            const elementCenter = rect.top + (rect.height / 2);
+            
+            // Calculate offset based on distance from center of viewport
+            const yPos = (elementCenter - center) * speed;
+            
+            parallaxImg.style.transform = `translateY(${yPos}px)`;
           }
-        }, { passive: true });
+        };
+
+        window.addEventListener('scroll', () => window.requestAnimationFrame(onScroll), { passive: true });
+        // Initial trigger
+        onScroll();
+      }
+    };
+
+    // Initialize when section loads
+    document.addEventListener('DOMContentLoaded', () => {
+      const section = document.querySelector('[data-section-id="{{ section.id }}"]');
+      initSection(section);
+    });
+
+    // Re-init for Shopify Editor interactions
+    document.addEventListener('shopify:section:load', (e) => {
+      if (e.target.dataset.sectionId === '{{ section.id }}') {
+        initSection(e.target);
       }
     });
   })();
