@@ -352,27 +352,80 @@
       margin-top: 0;
     }
   }
+
+  /* --- FADE IN ANIMATIONS --- */
+  .fade-in {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform; /* Performance hint */
+  }
+
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
 {% endstylesheet %}
 
 <script>
   (function() {
-    document.addEventListener('DOMContentLoaded', function() {
-      const section = document.querySelector('[data-section-id="{{ section.id }}"]');
-      if(!section) return;
-
-      const fadeElements = section.querySelectorAll('.fade-in');
+    // 1. Define the Animation Logic
+    const initAnimations = (container) => {
+      // If no specific container provided, search the whole document (for first load)
+      const scope = container || document;
+      
+      const fadeElements = scope.querySelectorAll('.fade-in:not(.visible)');
       if (fadeElements.length === 0) return;
 
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-            observer.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+      const observerOptions = {
+        threshold: 0.1, // Trigger when 10% of element is visible
+        rootMargin: '0px 0px -50px 0px' // Trigger slightly before it hits the bottom
+      };
 
-      fadeElements.forEach(el => observer.observe(el));
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const target = entry.target;
+              
+              // Optional: Add Stagger if inside a grid
+              const parent = target.closest('.ryssa-grid__items, .lookbook-grid');
+              if (parent) {
+                const siblings = Array.from(parent.children); // Get all direct children
+                const index = siblings.indexOf(target.closest('article') || target); 
+                // Delay based on index (0ms, 100ms, 200ms...)
+                setTimeout(() => {
+                  target.classList.add('visible');
+                }, index * 100); 
+              } else {
+                // No grid? Instant fade.
+                target.classList.add('visible');
+              }
+
+              observer.unobserve(target);
+            }
+          });
+        }, observerOptions);
+
+        fadeElements.forEach(el => observer.observe(el));
+      } else {
+        // Fallback for very old browsers
+        fadeElements.forEach(el => el.classList.add('visible'));
+      }
+    };
+
+    // 2. Run on Initial Load (Handles both Ready and Loading states)
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      initAnimations();
+    } else {
+      document.addEventListener('DOMContentLoaded', () => initAnimations());
+    }
+
+    // 3. Support Shopify Theme Editor (Re-run when settings change)
+    document.addEventListener('shopify:section:load', (e) => {
+      if (e.target.dataset.sectionId === '{{ section.id }}') {
+        initAnimations(e.target);
+      }
     });
   })();
 </script>
