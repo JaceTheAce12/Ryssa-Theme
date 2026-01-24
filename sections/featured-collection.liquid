@@ -21,6 +21,12 @@
   [data-section-id="{{ section.id }}"] .featured-section__watermark {
     content: '{{ section.settings.watermark_text | default: 'RYSSA' }}';
   }
+
+  /* Ensure fade-in elements are visible (CSS fallback for when JS hasn't loaded) */
+  [data-section-id="{{ section.id }}"] .fade-in {
+    opacity: 1;
+    transform: translateY(0);
+  }
 </style>
 
 <section class="featured-section section" data-section-id="{{ section.id }}">
@@ -518,4 +524,3 @@
   }
 {% endstylesheet %}
 
-<script src="{{ 'animations.js' | asset_url }}" defer="defer"></script>
