@@ -47,6 +47,7 @@
     },
     "featured_collection_4BRkz7": {
       "type": "featured-collection",
+      "disabled": true,
       "name": "Featured Editor's Picks",
       "settings": {
         "eyebrow": "Curated Selection",
@@ -54,10 +55,10 @@
         "watermark_text": "RYSSA",
         "collection": "frontpage",
         "products_to_show": 3,
-        "bg_color": "#FDF5F3",
-        "accent_color": "#CBB674",
-        "heading_color": "#351E28",
-        "text_color": "#1A1A1A"
+        "bg_color": "#fdf5f3",
+        "accent_color": "#cbb674",
+        "heading_color": "#351e28",
+        "text_color": "#1a1a1a"
       }
     },
     "split_content_dm9TBQ": {
