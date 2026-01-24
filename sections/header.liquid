@@ -1,9 +1,7 @@
 {%- comment -%}
   ----------------------------------------------------------------------------------
   RYSSA HEADER - Custom Implementation
-  Includes: HTML Structure, Schema Settings, CSS Design System, and Interactivity JS
-  - Fix: Corrected Hamburger "X" animation alignment
-  - Fix: Prevents logo overlap on small screens
+  Includes: Inline Search Bar, Mobile Logic, and Animations
   ----------------------------------------------------------------------------------
 {%- endcomment -%}
 
@@ -55,12 +53,12 @@
     <div class="site-header__actions">
       
       {%- if section.settings.show_search -%}
-        <a href="{{ routes.search_url }}" class="site-header__action-btn" aria-label="Search">
+        <button type="button" class="site-header__action-btn js-search-toggle" aria-label="Search">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor">
             <circle cx="9" cy="9" r="6" stroke-width="1.5"/>
             <path d="M13.5 13.5L17 17" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
-        </a>
+        </button>
       {%- endif -%}
 
       {%- if shop.customer_accounts_enabled -%}
@@ -84,6 +82,37 @@
       </a>
     </div>
   </div>
+
+  <div class="site-header__search-bar" aria-hidden="true">
+    <div class="container">
+      <form action="{{ routes.search_url }}" method="get" role="search" class="search-form">
+        <input type="hidden" name="type" value="product">
+        
+        <button type="submit" class="search-form__submit" aria-label="Submit search">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor">
+            <circle cx="9" cy="9" r="6" stroke-width="1.5"/>
+            <path d="M13.5 13.5L17 17" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </button>
+
+        <input 
+          type="search" 
+          name="q" 
+          value="{{ search.terms | escape }}" 
+          placeholder="Search for..." 
+          class="search-form__input"
+          aria-label="Search"
+        >
+
+        <button type="button" class="search-form__close js-search-close" aria-label="Close search">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor">
+            <path d="M1 1L13 13M13 1L1 13" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </form>
+    </div>
+  </div>
+
 </header>
 
 <div class="mobile-nav-overlay" id="mobile-nav" aria-hidden="true">
@@ -145,259 +174,21 @@
 
 {% stylesheet %}
   /* ========================================
-     CSS CUSTOM PROPERTIES
+     CSS VARIABLES & RESET
      ======================================== */
-
   :root {
-    /* Colors - Neutrals */
     --color-white: #FFFFFF;
-    --color-cloud: #F8F6F3;
-    --color-sand: #E3DAC9;
-    --color-taupe: #CAB9A9;
-    --color-mocha: #A89788;
-    --color-charcoal: #3A3632;
     --color-black: #1A1A1A;
-
-    /* Colors - Accent */
-    --color-accent-primary: #8B7355;
-    --color-accent-secondary: #2C3E50;
-
-    /* Colors - Primary Accent (Pale Blue) */
-    --color-primary: #e9f5ff;
-    --color-primary-hover: #d4ecff;
-    --color-primary-dark: #c0e3ff;
-
-    /* Colors - Semantic */
-    --color-text-primary: var(--color-black);
-    --color-text-secondary: #525252;
-    --color-background-primary: var(--color-white);
-    --color-background-secondary: var(--color-cloud);
-
-    /* Typography - Fonts */
-    --font-display: 'Playfair Display', Georgia, serif;
-    --font-body: 'Inter', 'Helvetica Neue', Arial, sans-serif;
-
-    /* Typography - Type Scale */
-    --text-base: 1rem;      /* 16px */
-    --text-lg: 1.25rem;     /* 20px */
-    --text-xl: 1.563rem;    /* 25px */
-    --text-2xl: 1.953rem;   /* 31.25px */
-    --text-3xl: 2.441rem;   /* 39px */
-    --text-4xl: 3.052rem;   /* 48.83px */
-    --text-5xl: 3.815rem;   /* 61.04px */
-
-    /* Typography - Font Weights */
-    --font-light: 300;
-    --font-regular: 400;
-    --font-medium: 500;
-    --font-semibold: 600;
-
-    /* Typography - Line Heights */
-    --leading-tight: 1.2;
-    --leading-normal: 1.5;
-    --leading-relaxed: 1.6;
-
-    /* Typography - Letter Spacing */
-    --tracking-tight: -0.02em;
-    --tracking-normal: 0;
-    --tracking-wide: 0.1em;
-    --tracking-wider: 0.15em;
-
-    /* Layout - Grid System */
-    --grid-columns: 12;
-    --grid-gap: 24px;
-    --content-max-width: 1440px;
-
-    /* Layout - Spacing */
-    --spacing-xs: 8px;
-    --spacing-sm: 16px;
-    --spacing-md: 24px;
-    --spacing-lg: 32px;
-    --spacing-xl: 48px;
-    --spacing-2xl: 80px;
-    --spacing-3xl: 120px;
-    --spacing-4xl: 160px;
-
-    /* Animation - Easing */
-    --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
-    --ease-default: ease;
-
-    /* Animation - Duration */
-    --duration-fast: 150ms;
-    --duration-base: 300ms;
-    --duration-slow: 600ms;
-
-    /* Shadows */
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
-    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
-
-    /* Border Radius */
-    --radius-sm: 2px;
-    --radius-md: 4px;
-    --radius-lg: 8px;
-
-    /* Border Colors */
     --color-border-light: #E8E8E8;
-    --color-border-subtle: rgba(0, 0, 0, 0.08);
+    --font-display: 'Playfair Display', serif;
+    --font-body: 'Inter', sans-serif;
+    --duration-base: 300ms;
+    --ease-default: ease;
   }
-
 
   /* ========================================
-     CSS RESET & BASE STYLES
+     SITE HEADER STYLES
      ======================================== */
-
-  *,
-  *::before,
-  *::after {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
-
-  html {
-    scroll-behavior: smooth;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
-  body {
-    font-family: var(--font-body);
-    font-size: var(--text-base);
-    font-weight: var(--font-regular);
-    line-height: var(--leading-relaxed);
-    color: var(--color-text-primary);
-    background-color: var(--color-background-primary);
-    overflow-x: hidden;
-  }
-
-  img,
-  picture,
-  video,
-  canvas,
-  svg {
-    display: block;
-    max-width: 100%;
-  }
-
-  img {
-    height: auto;
-  }
-
-  button,
-  input,
-  textarea,
-  select {
-    font: inherit;
-  }
-
-  a {
-    color: inherit;
-    text-decoration: none;
-  }
-
-  ul,
-  ol {
-    list-style: none;
-  }
-
-  button {
-    background: none;
-    border: none;
-    cursor: pointer;
-  }
-
-
-  /* ========================================
-     TYPOGRAPHY
-     ======================================== */
-
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-family: var(--font-display);
-    font-weight: var(--font-light);
-    line-height: var(--leading-tight);
-    letter-spacing: var(--tracking-tight);
-    margin-bottom: 0.5em;
-  }
-
-  h1 {
-    font-size: clamp(2.5rem, 6vw, var(--text-5xl));
-  }
-
-  h2 {
-    font-size: clamp(2rem, 4vw, var(--text-4xl));
-  }
-
-  h3 {
-    font-size: var(--text-2xl);
-    font-weight: var(--font-medium);
-    letter-spacing: var(--tracking-normal);
-  }
-
-  h4 {
-    font-size: var(--text-lg);
-    font-weight: var(--font-medium);
-  }
-
-  p {
-    margin-bottom: 1em;
-  }
-
-  p:last-child {
-    margin-bottom: 0;
-  }
-
-  .eyebrow {
-    display: block;
-    font-family: var(--font-body);
-    font-size: 11px;
-    font-weight: var(--font-semibold);
-    text-transform: uppercase;
-    letter-spacing: var(--tracking-wider);
-    color: var(--color-text-secondary);
-    margin-bottom: var(--spacing-sm);
-    transition: color var(--duration-fast) var(--ease-default);
-  }
-
-  .fade-in.visible .eyebrow {
-    color: var(--color-accent-primary);
-  }
-
-
-  /* ========================================
-     LAYOUT UTILITIES
-     ======================================== */
-
-  .container {
-    width: 100%;
-    max-width: var(--content-max-width);
-    margin: 0 auto;
-    padding: 0 var(--spacing-md);
-  }
-
-  .section {
-    padding-block: clamp(var(--spacing-2xl), 12vw, var(--spacing-4xl));
-  }
-
-  .section-header {
-    text-align: center;
-    margin-bottom: var(--spacing-2xl);
-  }
-
-  .section-title {
-    font-weight: var(--font-regular);
-  }
-
-
-  /* ========================================
-     SITE HEADER
-     ======================================== */
-
   .site-header {
     position: fixed;
     top: 0;
@@ -409,31 +200,20 @@
     transition: transform var(--duration-base) var(--ease-default);
   }
 
-  .site-header--hidden {
-    transform: translateY(-100%);
-  }
-
   .site-header__inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
     height: 80px;
-    max-width: var(--content-max-width);
+    max-width: 1440px;
     margin: 0 auto;
-    padding: 0 var(--spacing-md);
+    padding: 0 24px;
+    background-color: var(--color-white); /* Ensure background obscures content */
+    position: relative;
+    z-index: 20; /* Above search bar layer */
   }
 
-  .site-header__logo svg {
-    display: block;
-    color: var(--color-black);
-    transition: opacity var(--duration-fast) var(--ease-default);
-  }
-
-  .site-header__logo:hover svg {
-    opacity: 0.7;
-  }
-
-  /* Desktop Navigation */
+  /* Navigation */
   .site-header__nav {
     position: absolute;
     left: 50%;
@@ -442,358 +222,312 @@
 
   .site-header__menu {
     display: flex;
-    gap: var(--spacing-xl);
+    gap: 32px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
   }
 
   .site-header__menu a {
+    text-decoration: none;
+    color: var(--color-black);
+    font-family: var(--font-body);
     font-size: 14px;
-    font-weight: var(--font-medium);
     text-transform: uppercase;
-    letter-spacing: var(--tracking-wide);
-    transition: color var(--duration-fast) var(--ease-default);
-    position: relative;
+    letter-spacing: 0.1em;
   }
 
-  .site-header__menu a::after {
-    content: '';
+  /* Actions */
+  .site-header__actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .site-header__action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-black);
+    padding: 4px;
+  }
+
+  /* Cart Badge */
+  .site-header__cart { position: relative; }
+  .cart-count {
     position: absolute;
-    bottom: -4px;
+    top: -2px;
+    right: -4px;
+    background: var(--color-black);
+    color: var(--color-white);
+    font-size: 10px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ========================================
+     INLINE SEARCH BAR CSS
+     ======================================== */
+  .site-header__search-bar {
+    position: absolute;
+    top: 0;
     left: 0;
-    width: 0;
-    height: 2px;
-    background-color: var(--color-primary-hover);
-    transition: width var(--duration-base) var(--ease-smooth);
-  }
-
-  .site-header__menu a:hover,
-  .site-header__menu a.active {
-    color: var(--color-accent-primary);
-  }
-
-  .site-header__menu a:hover::after,
-  .site-header__menu a.active::after {
     width: 100%;
+    height: 100%;
+    background-color: var(--color-white);
+    z-index: 30; /* Sit on top of everything inside header */
+    display: flex;
+    align-items: center;
+    
+    /* Animation State: Hidden (Slide Up) */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
   }
 
-  .site-header__menu a:active {
-    color: var(--color-charcoal);
+  /* Animation State: Active (Slide Down) */
+  .site-header__search-bar.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
   }
 
-  /* Mobile Menu Toggle */
+  .site-header__search-bar .container {
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .search-form {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 12px;
+  }
+
+  .search-form__input {
+    flex: 1;
+    border: none;
+    border-bottom: 1px solid transparent;
+    font-family: var(--font-body);
+    font-size: 16px;
+    padding: 8px 0;
+    outline: none;
+    background: transparent;
+    transition: border-color 0.2s ease;
+  }
+
+  .search-form__input:focus {
+    border-bottom-color: var(--color-black);
+  }
+
+  .search-form__submit,
+  .search-form__close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-black);
+    padding: 8px;
+    display: flex;
+    align-items: center;
+  }
+
+  .search-form__close:hover {
+    opacity: 0.6;
+  }
+
+  /* ========================================
+     MOBILE & RESPONSIVE FIXES
+     ======================================== */
+  
   .site-header__menu-toggle {
     display: none;
     flex-direction: column;
     gap: 5px;
-    padding: 8px;
-    min-width: 44px;
-    min-height: 44px;
-    align-items: center;
-    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
     position: relative;
     z-index: 10;
   }
 
   .site-header__menu-toggle span {
-    display: block;
     width: 24px;
     height: 2px;
     background-color: var(--color-black);
-    transition: all var(--duration-base) var(--ease-smooth);
+    transition: all 0.3s ease;
   }
 
-  /* --- FIXED X ANIMATION --- */
-  /* Top bar: Move down to center, THEN rotate */
+  /* Hamburger Animation */
   .site-header__menu-toggle[aria-expanded="true"] span:nth-child(1) {
     transform: translateY(7px) rotate(45deg);
   }
-
-  /* Middle bar: Fade out */
   .site-header__menu-toggle[aria-expanded="true"] span:nth-child(2) {
     opacity: 0;
   }
-
-  /* Bottom bar: Move up to center, THEN rotate */
   .site-header__menu-toggle[aria-expanded="true"] span:nth-child(3) {
     transform: translateY(-7px) rotate(-45deg);
   }
 
-  /* Header Actions */
-  .site-header__actions {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-  }
-
-  .site-header__action-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 44px;
-    min-height: 44px;
-    color: var(--color-black);
-    transition: opacity var(--duration-fast) var(--ease-default);
-  }
-
-  .site-header__action-btn:hover {
-    opacity: 0.6;
-  }
-
-  .site-header__action-btn:active {
-    opacity: 0.4;
-  }
-
-  .site-header__action-btn:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-  }
-
-  .site-header__cart {
-    position: relative;
-  }
-
-  .cart-count {
-    position: absolute;
-    top: var(--spacing-xs);
-    right: var(--spacing-xs);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 18px;
-    height: 18px;
-    padding: 0 4px;
-    font-size: 10px;
-    font-weight: var(--font-semibold);
-    color: var(--color-white);
-    background-color: var(--color-black);
-    border-radius: 50%;
-    line-height: 1;
-  }
-
-  /* Mobile Navigation Overlay */
-  .mobile-nav-overlay {
-    position: fixed;
-    top: 80px;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: var(--color-white);
-    z-index: 999;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity var(--duration-base) var(--ease-default),
-              visibility var(--duration-base) var(--ease-default);
-  }
-
-  .mobile-nav-overlay.active {
-    opacity: 1;
-    visibility: visible;
-  }
-
-  .mobile-nav {
-    padding: var(--spacing-xl) var(--spacing-md);
-  }
-
-  .mobile-nav__menu {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-md);
-  }
-
-  .mobile-nav__menu a {
-    font-size: var(--text-xl);
-    font-family: var(--font-display);
-    font-weight: var(--font-light);
-    letter-spacing: var(--tracking-tight);
-    padding: var(--spacing-sm) 0;
-    border-bottom: 1px solid var(--color-border-subtle);
-    transition: color var(--duration-fast) var(--ease-default),
-              background-color var(--duration-fast) var(--ease-default);
-  }
-
-  .mobile-nav__menu a:hover,
-  .mobile-nav__menu a:focus-visible {
-    color: var(--color-accent-primary);
-    background-color: rgba(139, 115, 85, 0.08);
-  }
-
-  .mobile-nav__menu a:active {
-    background-color: rgba(139, 115, 85, 0.15);
-  }
-
-  /* ========================================
-     RESPONSIVE BREAKPOINTS
-     ======================================== */
-
-  /* Tablet (768px) */
   @media (max-width: 768px) {
-    .container {
-      padding: 0 var(--spacing-md);
-    }
-
-    /* Header */
-    .site-header__nav {
-      display: none;
-    }
-
-    .site-header__menu-toggle {
-      display: flex;
-    }
-
+    .site-header__nav { display: none; }
+    .site-header__menu-toggle { display: flex; }
+    
     .site-header__logo {
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
-      max-width: 50%; /* Prevent overlapping */
+      z-index: 1;
       display: flex;
       justify-content: center;
-      z-index: 1;
-    }
-    
-    .site-header__logo img,
-    .site-header__logo svg {
-      max-width: 100%;
-      height: auto;
+      max-width: 50%; /* Prevent overlap on standard mobile */
     }
 
+    /* Tighter spacing for mobile icons */
     .site-header__actions {
-      gap: 8px; /* Tighter gap on tablet/mobile */
+      gap: 8px;
       position: relative;
       z-index: 10;
     }
   }
 
-  /* Small Mobile (<400px) Fix */
+  /* TINY SCREEN FIX (<400px) */
   @media (max-width: 400px) {
+    .site-header__inner { padding: 0 12px; }
+    
     .site-header__logo {
-      max-width: 100px; /* Force smaller logo to prevent overlap */
+      max-width: 100px; /* Aggressively shrink logo to fit */
     }
+    
     .site-header__actions {
-      gap: 4px; /* Extra tight gap */
+      gap: 4px; /* Minimal gap between search/cart */
     }
   }
+
+  /* Mobile Nav Overlay */
+  .mobile-nav-overlay {
+    position: fixed;
+    top: 80px; left: 0; right: 0; bottom: 0;
+    background: var(--color-white);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+  }
+  .mobile-nav-overlay.active { opacity: 1; visibility: visible; }
+  .mobile-nav { padding: 40px 24px; }
+  .mobile-nav__menu { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 24px; }
+  .mobile-nav__menu a { font-size: 24px; text-decoration: none; color: var(--color-black); font-family: var(--font-display); }
 {% endstylesheet %}
 
 <script>
-/**
- * Magazine-Style Fashion Landing Page
- * Main JavaScript - Vanilla JS Implementation
- */
-
 (function() {
   'use strict';
 
   /* ========================================
-     HEADER SCROLL BEHAVIOR
+     SEARCH TOGGLE LOGIC
      ======================================== */
-  class HeaderScroll {
+  class SearchToggle {
     constructor() {
+      this.trigger = document.querySelector('.js-search-toggle');
+      this.closeBtn = document.querySelector('.js-search-close');
+      this.searchBar = document.querySelector('.site-header__search-bar');
+      this.input = document.querySelector('.search-form__input');
       this.header = document.querySelector('.site-header');
-      this.lastScrollY = window.scrollY;
-      this.ticking = false;
-      if (this.header) { this.init(); }
-    }
 
-    init() {
-      window.addEventListener('scroll', () => {
-        if (!this.ticking) {
-          window.requestAnimationFrame(() => {
-            this.handleScroll();
-            this.ticking = false;
-          });
-          this.ticking = true;
-        }
-      }, { passive: true });
-    }
-
-    handleScroll() {
-      if (!this.header) return;
-      const currentScrollY = window.scrollY;
-      if (currentScrollY > this.lastScrollY && currentScrollY > 100) {
-        this.header.classList.add('site-header--hidden');
-      } else {
-        this.header.classList.remove('site-header--hidden');
-      }
-      this.lastScrollY = currentScrollY;
-    }
-  }
-
-  /* ========================================
-     MOBILE MENU TOGGLE
-     ======================================== */
-  class MobileMenu {
-    constructor() {
-      this.toggle = document.querySelector('.site-header__menu-toggle');
-      this.overlay = document.querySelector('.mobile-nav-overlay');
-      this.body = document.body;
-      this.scrollbarWidth = 0;
-      this.isOpen = false;
-      if (this.toggle && this.overlay) {
-        this.scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      if (this.trigger && this.searchBar) {
         this.init();
       }
     }
 
     init() {
-      this.toggle.addEventListener('click', () => this.toggleMenu());
-      const menuLinks = this.overlay.querySelectorAll('a');
-      menuLinks.forEach(link => {
-        link.addEventListener('click', () => this.closeMenu());
+      // Open Search
+      this.trigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.open();
       });
+
+      // Close Search
+      this.closeBtn.addEventListener('click', () => this.close());
+
+      // Close on Escape Key
       document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && this.isOpen) {
-          this.closeMenu();
-          this.toggle.focus();
+        if (e.key === 'Escape' && this.isOpen()) {
+          this.close();
         }
       });
     }
 
-    toggleMenu() {
-      if (this.isOpen) { this.closeMenu(); } else { this.openMenu(); }
+    open() {
+      this.searchBar.classList.add('active');
+      this.searchBar.setAttribute('aria-hidden', 'false');
+      // Wait for animation to finish slightly before focusing to avoid jumpiness
+      setTimeout(() => this.input.focus(), 100);
     }
 
-    openMenu() {
-      this.overlay.classList.add('active');
-      this.overlay.setAttribute('aria-hidden', 'false');
-      this.toggle.setAttribute('aria-expanded', 'true');
-      this.toggle.setAttribute('aria-label', 'Close menu');
-      this.body.style.overflow = 'hidden';
-      this.body.style.paddingRight = `${this.scrollbarWidth}px`;
-      this.isOpen = true;
-      const firstLink = this.overlay.querySelector('a');
-      if (firstLink) { firstLink.focus(); }
+    close() {
+      this.searchBar.classList.remove('active');
+      this.searchBar.setAttribute('aria-hidden', 'true');
     }
 
-    closeMenu() {
-      this.overlay.classList.remove('active');
-      this.overlay.setAttribute('aria-hidden', 'true');
-      this.toggle.setAttribute('aria-expanded', 'false');
-      this.toggle.setAttribute('aria-label', 'Open menu');
-      this.body.style.overflow = '';
-      this.body.style.paddingRight = '';
-      this.isOpen = false;
+    isOpen() {
+      return this.searchBar.classList.contains('active');
     }
   }
 
   /* ========================================
-     INITIALIZE
+     MOBILE MENU & SCROLL (Existing Logic)
      ======================================== */
-  function init() {
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initializeModules);
-    } else {
-      initializeModules();
+  class HeaderLogic {
+    constructor() {
+      this.initMenu();
+      this.initScroll();
+    }
+
+    initMenu() {
+      const toggle = document.querySelector('.site-header__menu-toggle');
+      const overlay = document.querySelector('.mobile-nav-overlay');
+      
+      if(!toggle || !overlay) return;
+
+      toggle.addEventListener('click', () => {
+        const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+        toggle.setAttribute('aria-expanded', !isExpanded);
+        overlay.classList.toggle('active');
+        document.body.style.overflow = isExpanded ? '' : 'hidden';
+      });
+    }
+
+    initScroll() {
+      let lastScroll = window.scrollY;
+      const header = document.querySelector('.site-header');
+      
+      window.addEventListener('scroll', () => {
+        const currentScroll = window.scrollY;
+        if(currentScroll > lastScroll && currentScroll > 100) {
+          header.classList.add('site-header--hidden');
+        } else {
+          header.classList.remove('site-header--hidden');
+        }
+        lastScroll = currentScroll;
+      }, { passive: true });
     }
   }
 
-  function initializeModules() {
-    try {
-      new HeaderScroll();
-      new MobileMenu();
-    } catch (error) {
-      console.warn('Header JS Error:', error);
-    }
-  }
+  // Initialize
+  document.addEventListener('DOMContentLoaded', () => {
+    new SearchToggle();
+    new HeaderLogic();
+  });
 
-  init();
 })();
 </script>
