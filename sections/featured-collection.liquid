@@ -1,10 +1,8 @@
 {%- comment -%}
   ----------------------------------------------------------------------------------
   RYSSA FEATURED SECTION (Standard Flow)
-  - Layout: Natural height based on content (Grid + Padding)
-  - No height hacks or fixed sizing
-  - Content pushes the section open naturally
-  - Fix: Removed invalid Liquid filter syntax inside image_tag
+  - Fixed: Renamed collection variable to avoid conflicts
+  - Fixed: Logic now falls back to placeholders if the selected collection has no visible products
   ----------------------------------------------------------------------------------
 {%- endcomment -%}
 
@@ -22,10 +20,11 @@
     content: '{{ section.settings.watermark_text | default: 'RYSSA' }}';
   }
 
-  /* Ensure fade-in elements are visible (CSS fallback for when JS hasn't loaded) */
+  /* FORCE VISIBILITY: Ensures content is visible even if JS fails */
   [data-section-id="{{ section.id }}"] .fade-in {
-    opacity: 1;
-    transform: translateY(0);
+    opacity: 1 !important;
+    transform: none !important;
+    visibility: visible !important;
   }
 </style>
 
@@ -48,11 +47,18 @@
     </header>
 
     <div class="product-grid__items">
-      {%- assign collection = section.settings.collection -%}
+      {%- assign target_collection = section.settings.collection -%}
       {%- assign limit = section.settings.products_to_show -%}
 
-      {%- if collection != blank and collection.products_count > 0 -%}
-        {%- for product in collection.products limit: limit -%}
+      {%- comment -%} 
+        LOGIC CHECK: 
+        1. Check if collection is selected 
+        2. Check if collection has products 
+      {%- endcomment -%}
+      
+      {%- if target_collection != blank and target_collection.products.size > 0 -%}
+        
+        {%- for product in target_collection.products limit: limit -%}
           <article class="product-card fade-in">
             <a href="{{ product.url }}" class="product-card__link">
               <div class="product-card__image-wrapper">
@@ -77,7 +83,8 @@
         {%- endfor -%}
       
       {%- else -%}
-        {%- comment -%} EMPTY STATE (Onboarding) {%- endcomment -%}
+        
+        {%- comment -%} FALLBACK / EMPTY STATE (Shows if collection is blank OR empty) {%- endcomment -%}
         {%- for i in (1..limit) -%}
           <article class="product-card fade-in">
             <a href="#" class="product-card__link">
@@ -92,6 +99,7 @@
             </a>
           </article>
         {%- endfor -%}
+        
       {%- endif -%}
     </div>
 
@@ -177,11 +185,11 @@
 
 {% stylesheet %}
   /* ========================================
-     FEATURED SECTION STYLES (Enhanced Visual Design)
+     FEATURED SECTION STYLES
      ======================================== */
 
   .featured-section {
-    /* CSS Custom Properties - Fallbacks */
+    /* Variables */
     --color-blush: #FDF5F3;
     --color-plum: #351E28;
     --color-gold: #CBB674;
@@ -192,17 +200,14 @@
     background-color: var(--color-bg);
     position: relative;
     width: 100%;
-
-    /* Content-driven height with generous spacing */
+    /* Standard Padding */
     padding: var(--spacing-section) 24px;
     height: auto;
     display: block;
-
-    /* Subtle texture overlay for depth */
     isolation: isolate;
   }
 
-  /* Separate Background Layer - Contains decorative elements */
+  /* Background Layer */
   .featured-section__bg-layer {
     position: absolute;
     top: 0;
@@ -214,7 +219,7 @@
     z-index: 0;
   }
 
-  /* Enhanced Decorative Watermark with refined styling */
+  /* Watermark */
   .featured-section__watermark {
     position: absolute;
     top: 50%;
@@ -229,47 +234,23 @@
     user-select: none;
     white-space: nowrap;
     z-index: 0;
-    pointer-events: none;
-    line-height: 1;
   }
 
-  /* Refined Gradient Accents - Multiple for depth */
+  /* Gradient */
   .featured-section__gradient {
     position: absolute;
     top: -50px;
     right: -50px;
     width: 400px;
     height: 400px;
-    background: radial-gradient(
-      circle at center,
-      rgba(203, 182, 116, 0.08) 0%,
-      rgba(232, 196, 196, 0.05) 40%,
-      transparent 75%
-    );
+    background: radial-gradient(circle at center, rgba(203, 182, 116, 0.08) 0%, transparent 75%);
     pointer-events: none;
     z-index: 0;
     border-radius: 50%;
     filter: blur(40px);
   }
 
-  /* Additional gradient for bottom left */
-  .featured-section__gradient::before {
-    content: '';
-    position: absolute;
-    bottom: -300px;
-    left: -300px;
-    width: 500px;
-    height: 500px;
-    background: radial-gradient(
-      circle at center,
-      rgba(53, 30, 40, 0.03) 0%,
-      transparent 60%
-    );
-    border-radius: 50%;
-    filter: blur(60px);
-  }
-
-  /* Content Container */
+  /* Container */
   .featured-section .container {
     position: relative;
     z-index: 1;
@@ -278,27 +259,10 @@
     width: 100%;
   }
 
-  /* Section Header - Enhanced hierarchy */
+  /* Header */
   .featured-section .section-header {
     text-align: center;
     margin-bottom: clamp(60px, 8vw, 80px);
-    position: relative;
-  }
-
-  /* Decorative line above eyebrow */
-  .featured-section .section-header::before {
-    content: '';
-    display: block;
-    width: 60px;
-    height: 1px;
-    background: linear-gradient(
-      to right,
-      transparent,
-      var(--color-accent),
-      transparent
-    );
-    margin: 0 auto 32px;
-    opacity: 0.5;
   }
 
   .featured-section .eyebrow {
@@ -309,7 +273,6 @@
     letter-spacing: 0.2em;
     color: var(--color-accent);
     margin-bottom: 20px;
-    position: relative;
   }
 
   .featured-section .section-title {
@@ -320,10 +283,9 @@
     color: var(--color-heading);
     margin: 0;
     line-height: 1.1;
-    letter-spacing: -0.01em;
   }
 
-  /* PRODUCT GRID - Responsive with better balance */
+  /* Product Grid */
   .product-grid__items {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -332,14 +294,7 @@
     position: relative;
   }
 
-  /* Support for 3-column layouts specifically */
-  @media (min-width: 1024px) {
-    .product-grid__items {
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    }
-  }
-
-  /* Enhanced Product Card */
+  /* Product Card */
   .product-card {
     display: block;
     width: 100%;
@@ -350,50 +305,26 @@
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  /* Subtle border and shadow for depth */
-  .product-card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    border-radius: 2px;
-    pointer-events: none;
-    z-index: 2;
-    transition: border-color 0.4s ease;
-  }
-
   .product-card:hover {
-    box-shadow:
-      0 4px 16px rgba(0, 0, 0, 0.06),
-      0 12px 32px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
     transform: translateY(-8px);
-  }
-
-  .product-card:hover::before {
-    border-color: rgba(203, 182, 116, 0.3);
   }
 
   .product-card__link {
     text-decoration: none;
     color: inherit;
     display: block;
-    transition: none;
   }
 
-  /* Image Wrapper - Refined aspect ratio and framing */
+  /* Image */
   .product-card__image-wrapper {
     width: 100%;
     aspect-ratio: 3 / 4;
     overflow: hidden;
-    background: linear-gradient(
-      135deg,
-      #F8F6F3 0%,
-      #F3F1ED 100%
-    );
+    background: #F8F6F3;
     position: relative;
   }
 
-  /* Image with enhanced hover effect */
   .product-card__img {
     width: 100%;
     height: 100%;
@@ -406,25 +337,18 @@
     transform: scale(1.05);
   }
 
-  /* SVG Placeholder with gradient */
   .product-card__img.placeholder-svg {
-    background: linear-gradient(
-      135deg,
-      #e8e8e8 0%,
-      #d4d4d4 100%
-    );
+    background: #e8e8e8;
     position: absolute;
-    top: 0;
-    left: 0;
+    top: 0; left: 0;
   }
 
-  /* Product Info - Better spacing and hierarchy */
+  /* Info */
   .product-card__info {
     text-align: center;
     padding: 28px 20px 32px;
     background: rgba(255, 255, 255, 0.6);
     backdrop-filter: blur(10px);
-    position: relative;
   }
 
   .product-card__title {
@@ -433,12 +357,6 @@
     font-weight: 400;
     margin: 0 0 12px 0;
     color: var(--color-text);
-    line-height: 1.3;
-    transition: color 0.3s ease;
-  }
-
-  .product-card:hover .product-card__title {
-    color: var(--color-heading);
   }
 
   .product-card__price {
@@ -446,81 +364,13 @@
     font-weight: 600;
     color: var(--color-text);
     opacity: 0.75;
-    letter-spacing: 0.02em;
-    transition: opacity 0.3s ease;
   }
 
-  .product-card:hover .product-card__price {
-    opacity: 1;
-  }
-
-  /* Tablet Breakpoint */
-  @media (max-width: 1024px) {
-    .product-grid__items {
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 36px;
-    }
-  }
-
-  /* Mobile Optimization */
+  /* Responsive */
   @media (max-width: 768px) {
-    .featured-section {
-      padding: 60px 20px;
-    }
-
-    .featured-section .section-header::before {
-      width: 40px;
-      margin-bottom: 24px;
-    }
-
-    .featured-section .section-header {
-      margin-bottom: 48px;
-    }
-
-    .product-grid__items {
-      grid-template-columns: 1fr;
-      gap: 28px;
-    }
-
-    .product-card__info {
-      padding: 24px 16px 28px;
-    }
-
-    /* Reduce watermark on mobile for better performance */
-    .featured-section__watermark {
-      font-size: clamp(6rem, 25vw, 10rem);
-      opacity: 0.8;
-    }
-  }
-
-  /* Small mobile devices */
-  @media (max-width: 480px) {
-    .featured-section {
-      padding: 48px 16px;
-    }
-
-    .product-grid__items {
-      gap: 24px;
-    }
-  }
-
-  /* Reduce motion for accessibility */
-  @media (prefers-reduced-motion: reduce) {
-    .product-card,
-    .product-card__img,
-    .product-card__link,
-    .product-card__title,
-    .product-card__price {
-      transition-duration: 0.01ms !important;
-    }
-
-    .product-card:hover {
-      transform: none;
-    }
-
-    .product-card:hover .product-card__img {
-      transform: scale(1.01);
-    }
+    .featured-section { padding: 60px 20px; }
+    .product-grid__items { grid-template-columns: 1fr; gap: 28px; }
   }
 {% endstylesheet %}
 
+<script src="{{ 'animations.js' | asset_url }}" defer="defer"></script>
