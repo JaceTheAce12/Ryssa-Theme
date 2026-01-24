@@ -2,8 +2,8 @@
   ----------------------------------------------------------------------------------
   RYSSA HEADER - Custom Implementation
   Includes: HTML Structure, Schema Settings, CSS Design System, and Interactivity JS
-  - Fix: Restored Menu Hover Effects (Pale Blue Underline)
-  - Fix: Logo overlap constraints & Search Toggle logic included
+  - Fix: Added CSS resets for button elements (Search & Hamburger)
+  - Fix: Hamburger 'X' alignment and visibility
   ----------------------------------------------------------------------------------
 {%- endcomment -%}
 
@@ -18,7 +18,7 @@
 >
   <div class="site-header__inner">
     
-    <button class="site-header__menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-nav">
+    <button type="button" class="site-header__menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-nav">
       <span></span>
       <span></span>
       <span></span>
@@ -101,7 +101,7 @@
           type="search" 
           name="q" 
           value="{{ search.terms | escape }}" 
-          placeholder="Search for..." 
+          placeholder="Search..." 
           class="search-form__input"
           aria-label="Search"
         >
@@ -271,7 +271,7 @@
     opacity: 0.7;
   }
 
-  /* --- Desktop Navigation (Restored Hover Styles) --- */
+  /* --- Desktop Navigation --- */
   .site-header__nav {
     position: absolute;
     left: 50%;
@@ -297,7 +297,7 @@
     position: relative;
   }
 
-  /* Restored Pale Blue Underline Effect */
+  /* Pale Blue Underline Effect */
   .site-header__menu a::after {
     content: '';
     position: absolute;
@@ -323,14 +323,18 @@
     color: var(--color-charcoal);
   }
 
-  /* --- Mobile Menu Toggle (Fixed Alignment) --- */
+  /* --- Mobile Menu Toggle (Hamburger) --- */
   .site-header__menu-toggle {
     display: none;
     flex-direction: column;
     gap: 5px;
-    padding: 8px;
-    min-width: 44px;
-    min-height: 44px;
+    
+    /* RESET BUTTON STYLES */
+    background: transparent;
+    border: none;
+    padding: 8px; /* Touch target */
+    cursor: pointer;
+    
     align-items: center;
     justify-content: center;
     position: relative;
@@ -341,7 +345,7 @@
     display: block;
     width: 24px;
     height: 2px;
-    background-color: var(--color-black);
+    background-color: var(--color-black); /* Crucial: ensures lines are visible */
     transition: all var(--duration-base) var(--ease-smooth);
   }
 
@@ -369,6 +373,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    
+    /* RESET BUTTON STYLES */
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    
     min-width: 44px;
     min-height: 44px;
     color: var(--color-black);
@@ -381,6 +391,11 @@
 
   .site-header__action-btn:active {
     opacity: 0.4;
+  }
+
+  .site-header__action-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
   }
 
   .site-header__cart {
