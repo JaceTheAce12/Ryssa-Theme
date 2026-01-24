@@ -2,7 +2,7 @@
   ----------------------------------------------------------------------------------
   RYSSA FEATURED SECTION (EDITOR'S PICKS)
   - Style: Editorial Grid with background watermark
-  - Fix: Used aspect-ratio + overflow:hidden to contain layout and prevent overlap
+  - Fix: Increased padding and min-height to ensure all content is visible
   ----------------------------------------------------------------------------------
 {%- endcomment -%}
 
@@ -178,31 +178,39 @@
     --font-light: 300;
     
     background-color: var(--color-blush);
-    /* Generous padding ensures content doesn't touch edges */
-    padding-top: clamp(80px, 12vw, 120px);
-    padding-bottom: 120px; 
+    
+    /* PADDING UPDATE: Increased to prevent cut-off */
+    padding-top: 140px; 
+    padding-bottom: 160px; /* Generous bottom space */
     padding-left: 24px;
     padding-right: 24px;
     
+    /* HEIGHT FIX: Ensure section is tall enough */
+    min-height: 800px;
+    height: auto;
+    
     position: relative;
-    /* CRITICAL: Keep overflow hidden to prevent bleed, but use padding to show content */
-    overflow: hidden; 
+    /* Do not use overflow:hidden here or it clips the grid */
   }
 
-  /* Decorative Watermark */
+  /* Decorative Watermark (Clipped to Background only) */
   .featured-section__watermark {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    top: 0;
+    left: 0;
     width: 100%;
-    text-align: center;
+    height: 100%;
+    overflow: hidden; /* Clips the giant text */
     pointer-events: none;
     z-index: 0;
   }
 
   .featured-section__watermark::before {
     content: 'RYSSA'; 
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     font-family: var(--font-editorial);
     font-size: clamp(8rem, 15vw, 15rem);
     font-weight: var(--font-light);
@@ -230,14 +238,15 @@
 
   .featured-section .container {
     position: relative;
-    z-index: 1; /* Place content above background */
+    z-index: 1; /* Content above decoration */
     max-width: 1440px;
     margin: 0 auto;
+    height: 100%; /* Ensure container fills section */
   }
 
   .featured-section .section-header {
     text-align: center;
-    margin-bottom: 60px;
+    margin-bottom: 80px;
   }
 
   .featured-section .eyebrow {
@@ -264,6 +273,8 @@
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 48px;
     width: 100%;
+    /* Ensure grid height calculates correctly */
+    height: auto; 
   }
 
   /* Product Card */
@@ -284,11 +295,10 @@
     transform: translateY(-8px);
   }
 
-  /* Image Container - Using Aspect Ratio instead of padding hack */
+  /* Image Container - Using Aspect Ratio */
   .product-card__image {
     position: relative;
     width: 100%;
-    /* Modern Fix: Calculates height automatically, preventing collapse */
     aspect-ratio: 3 / 4; 
     overflow: hidden;
     background-color: #F8F6F3;
@@ -296,7 +306,7 @@
     border-radius: 2px;
   }
   
-  /* Fallback for old browsers if needed, typically not required for modern Shopify */
+  /* Fallback for older browsers */
   @supports not (aspect-ratio: 3 / 4) {
     .product-card__image {
       padding-top: 133.33%;
@@ -348,9 +358,9 @@
 
   /* Mobile */
   @media (max-width: 768px) {
-    .featured-section::after {
-      width: 150px;
-      height: 150px;
+    .featured-section {
+      padding-top: 80px;
+      padding-bottom: 80px;
     }
     .product-grid__items {
       grid-template-columns: 1fr;
