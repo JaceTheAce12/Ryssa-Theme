@@ -47,6 +47,7 @@
     },
     "featured_collection_4BRkz7": {
       "type": "featured-collection",
+      "disabled": true,
       "name": "Featured Editor's Picks",
       "settings": {
         "eyebrow": "Curated Selection",
