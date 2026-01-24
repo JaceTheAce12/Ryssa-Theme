@@ -1,0 +1,313 @@
+{%- comment -%}
+  ----------------------------------------------------------------------------------
+  RYSSA FEATURED SECTION (EDITOR'S PICKS)
+  - Style: Editorial Grid with background watermark
+  - Features: Dynamic Collection, Fade-in animations
+  - Dependencies: assets/animations.js
+  ----------------------------------------------------------------------------------
+{%- endcomment -%}
+
+<style>
+  /* Map Schema Settings to CSS Variables for this specific section */
+  [data-section-id="{{ section.id }}"] {
+    --color-blush: {{ section.settings.bg_color }};
+    --color-plum: {{ section.settings.heading_color }};
+    --color-gold: {{ section.settings.accent_color }};
+    --color-text: {{ section.settings.text_color }};
+  }
+  
+  /* Allow dynamic watermark text content via CSS variable if supported, 
+     otherwise falls back to CSS default */
+  [data-section-id="{{ section.id }}"] .featured-section::before {
+    content: '{{ section.settings.watermark_text | default: 'RYSSA' }}';
+  }
+</style>
+
+<section class="featured-section section" data-section-id="{{ section.id }}">
+  <div class="container">
+    
+    <header class="section-header fade-in">
+      {%- if section.settings.eyebrow != blank -%}
+        <span class="eyebrow">{{ section.settings.eyebrow }}</span>
+      {%- endif -%}
+      {%- if section.settings.title != blank -%}
+        <h2 class="section-title">{{ section.settings.title }}</h2>
+      {%- endif -%}
+    </header>
+
+    <div class="product-grid__items">
+      {%- assign collection = section.settings.collection -%}
+      {%- assign limit = section.settings.products_to_show -%}
+
+      {%- if collection != blank and collection.products_count > 0 -%}
+        {%- for product in collection.products limit: limit -%}
+          <article class="product-card fade-in">
+            <a href="{{ product.url }}" class="product-card__link">
+              <div class="product-card__image">
+                {%- if product.featured_media -%}
+                  {{ product.featured_media | image_url: width: 800 | image_tag: 
+                    loading: 'lazy',
+                    width: product.featured_media.width,
+                    height: product.featured_media.height,
+                    alt: product.title | escape
+                  }}
+                {%- else -%}
+                  {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                {%- endif -%}
+              </div>
+              <div class="product-card__info">
+                <h3 class="product-card__title">{{ product.title }}</h3>
+                <p class="product-card__price">{{ product.price | money }}</p>
+              </div>
+            </a>
+          </article>
+        {%- endfor -%}
+      
+      {%- else -%}
+        {%- comment -%} EMPTY STATE (Onboarding) {%- endcomment -%}
+        {%- for i in (1..limit) -%}
+          <article class="product-card fade-in">
+            <a href="#" class="product-card__link">
+              <div class="product-card__image">
+                {%- capture placeholder_index -%}{% cycle 1, 2, 3, 4, 5, 6 %}{%- endcapture -%}
+                {{ 'product-' | append: placeholder_index | placeholder_svg_tag: 'placeholder-svg' }}
+              </div>
+              <div class="product-card__info">
+                <h3 class="product-card__title">Editor's Pick {{ i }}</h3>
+                <p class="product-card__price">{{ 16500 | money }}</p>
+              </div>
+            </a>
+          </article>
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Featured Editor's Picks",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Curated Selection"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Editor's Picks"
+    },
+    {
+      "type": "text",
+      "id": "watermark_text",
+      "label": "Background Watermark Text",
+      "default": "RYSSA"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "min": 3,
+      "max": 12,
+      "step": 1,
+      "default": 3,
+      "label": "Products to show"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background (Blush)",
+      "default": "#FDF5F3"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent (Gold)",
+      "default": "#CBB674"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading (Plum)",
+      "default": "#351E28"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Product Text",
+      "default": "#1A1A1A"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Featured Editor's Picks"
+    }
+  ]
+}
+{% endschema %}
+
+{% stylesheet %}
+  /* ========================================
+     FEATURED SECTION - THE EDIT
+     ======================================== */
+
+  .featured-section {
+    /* Fallback variables if not set by schema */
+    --color-blush: #FDF5F3;
+    --color-plum: #351E28;
+    --color-gold: #CBB674;
+    --font-editorial: 'Bodoni Moda', 'Didot', 'Playfair Display', serif;
+    --font-light: 300;
+    --spacing-md: 24px;
+    --spacing-xl: 48px;
+    --spacing-2xl: 80px;
+    --spacing-3xl: 120px;
+
+    background-color: var(--color-blush);
+    padding: clamp(var(--spacing-2xl), 12vw, var(--spacing-3xl)) var(--spacing-md);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Decorative Watermark */
+  .featured-section::before {
+    content: 'RYSSA'; /* Overridden by schema setting in style block */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: var(--font-editorial);
+    font-size: clamp(8rem, 15vw, 15rem);
+    font-weight: var(--font-light);
+    color: rgba(0, 0, 0, 0.02);
+    letter-spacing: 0.1em;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .featured-section::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(
+      circle,
+      rgba(232, 196, 196, 0.3) 0%,
+      transparent 70%
+    );
+    pointer-events: none;
+  }
+
+  .featured-section .container {
+    position: relative;
+    z-index: 1;
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+
+  .featured-section .section-header {
+    text-align: center;
+    margin-bottom: var(--spacing-2xl);
+  }
+
+  .featured-section .eyebrow {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--color-gold);
+    margin-bottom: 16px;
+  }
+
+  .featured-section .section-title {
+    font-family: var(--font-editorial);
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 400;
+    color: var(--color-plum);
+    margin: 0;
+  }
+
+  /* Editorial Grid for Featured Section */
+  .featured-section .product-grid__items {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-xl);
+  }
+
+  /* Basic Card Styles (In case they aren't global) */
+  .product-card__image {
+    position: relative;
+    aspect-ratio: 3 / 4;
+    margin-bottom: 24px;
+    overflow: hidden;
+    background-color: #F8F6F3;
+  }
+  
+  .product-card__image img,
+  .product-card__image svg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  
+  .product-card:hover .product-card__image img {
+    transform: scale(1.03);
+  }
+
+  .product-card__image svg {
+    background: #e0e0e0;
+  }
+
+  .product-card__info {
+    text-align: center;
+  }
+
+  .product-card__title {
+    font-family: var(--font-editorial);
+    font-size: 1.25rem;
+    font-weight: 400;
+    margin: 0 0 8px 0;
+    color: var(--color-text);
+  }
+
+  .product-card__price {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text);
+    opacity: 0.7;
+  }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .featured-section::after {
+      width: 150px;
+      height: 150px;
+    }
+    .product-grid__items {
+      grid-template-columns: 1fr;
+    }
+  }
+{% endstylesheet %}
+
+<script src="{{ 'animations.js' | asset_url }}" defer="defer"></script>
