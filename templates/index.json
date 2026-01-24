@@ -34,6 +34,17 @@
         "products_to_show": 6
       }
     },
+    "quote_box_YGDjgK": {
+      "type": "quote-box",
+      "name": "Editorial Quote",
+      "settings": {
+        "quote": "<p><em>Fashion is about something that comes from within you.</em></p>",
+        "author": "Ralph Lauren",
+        "bg_color": "#351e28",
+        "text_color": "#ffffff",
+        "accent_color": "#cbb674"
+      }
+    },
     "split_content_dm9TBQ": {
       "type": "split-content",
       "name": "Split Content Block",
@@ -66,15 +77,19 @@
         "accent_color": "#8b7355"
       }
     },
-    "quote_box_YGDjgK": {
-      "type": "quote-box",
-      "name": "Editorial Quote",
+    "featured_collection_4BRkz7": {
+      "type": "featured-collection",
+      "name": "Featured Editor's Picks",
       "settings": {
-        "quote": "<p><em>Fashion is about something that comes from within you.</em></p>",
-        "author": "Ralph Lauren",
-        "bg_color": "#351E28",
-        "text_color": "#FFFFFF",
-        "accent_color": "#CBB674"
+        "eyebrow": "Curated Selection",
+        "title": "Editor's Picks",
+        "watermark_text": "RYSSA",
+        "collection": "",
+        "products_to_show": 3,
+        "bg_color": "#FDF5F3",
+        "accent_color": "#CBB674",
+        "heading_color": "#351E28",
+        "text_color": "#1A1A1A"
       }
     }
   },
@@ -82,6 +97,7 @@
     "hero_jVaWmY",
     "product_list_fa6P9H",
     "quote_box_YGDjgK",
+    "featured_collection_4BRkz7",
     "split_content_dm9TBQ",
     "split_content_BMwzrX"
   ]
