@@ -65,11 +65,23 @@
         "text_color": "#1a1a1a",
         "accent_color": "#8b7355"
       }
+    },
+    "quote_box_YGDjgK": {
+      "type": "quote-box",
+      "name": "Editorial Quote",
+      "settings": {
+        "quote": "<p><em>Fashion is about something that comes from within you.</em></p>",
+        "author": "Ralph Lauren",
+        "bg_color": "#351E28",
+        "text_color": "#FFFFFF",
+        "accent_color": "#CBB674"
+      }
     }
   },
   "order": [
     "hero_jVaWmY",
     "product_list_fa6P9H",
+    "quote_box_YGDjgK",
     "split_content_dm9TBQ",
     "split_content_BMwzrX"
   ]
