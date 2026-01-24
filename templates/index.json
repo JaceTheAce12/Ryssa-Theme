@@ -47,13 +47,12 @@
     },
     "featured_collection_4BRkz7": {
       "type": "featured-collection",
-      "disabled": true,
       "name": "Featured Editor's Picks",
       "settings": {
         "eyebrow": "Curated Selection",
         "title": "Editor's Picks",
         "watermark_text": "RYSSA",
-        "collection": "frontpage",
+        "collection": "featured-collection",
         "products_to_show": 3,
         "bg_color": "#fdf5f3",
         "accent_color": "#cbb674",
