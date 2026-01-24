@@ -2,8 +2,7 @@
   ----------------------------------------------------------------------------------
   RYSSA HEADER - Custom Implementation
   Includes: HTML Structure, Schema Settings, CSS Design System, and Interactivity JS
-  - Fix: Added CSS resets for button elements (Search & Hamburger)
-  - Fix: Hamburger 'X' alignment and visibility
+  - Fix: Added body padding to prevent header from covering page titles
   ----------------------------------------------------------------------------------
 {%- endcomment -%}
 
@@ -227,6 +226,74 @@
     /* Border Colors */
     --color-border-light: #E8E8E8;
     --color-border-subtle: rgba(0, 0, 0, 0.08);
+  }
+
+  /* ========================================
+     CSS RESET & BASE STYLES
+     ======================================== */
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    font-weight: var(--font-regular);
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-primary);
+    background-color: var(--color-background-primary);
+    overflow-x: hidden;
+    
+    /* FIX: Add top padding equal to header height (80px + 1px border) */
+    /* This prevents the fixed header from covering page titles */
+    padding-top: 81px; 
+  }
+
+  img,
+  picture,
+  video,
+  canvas,
+  svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  img {
+    height: auto;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  ul,
+  ol {
+    list-style: none;
+  }
+
+  button {
+    background: none;
+    border: none;
+    cursor: pointer;
   }
 
   /* ========================================
