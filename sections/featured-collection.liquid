@@ -2,13 +2,12 @@
   ----------------------------------------------------------------------------------
   RYSSA FEATURED SECTION (EDITOR'S PICKS)
   - Style: Editorial Grid with background watermark
-  - Features: Dynamic Collection, Fade-in animations
-  - Dependencies: assets/animations.js
+  - Fix: Applied padding-hack to images to prevent cutoff/height collapse
   ----------------------------------------------------------------------------------
 {%- endcomment -%}
 
 <style>
-  /* Map Schema Settings to CSS Variables for this specific section */
+  /* Map Schema Settings to CSS Variables */
   [data-section-id="{{ section.id }}"] {
     --color-blush: {{ section.settings.bg_color }};
     --color-plum: {{ section.settings.heading_color }};
@@ -16,8 +15,7 @@
     --color-text: {{ section.settings.text_color }};
   }
   
-  /* Allow dynamic watermark text content via CSS variable if supported, 
-     otherwise falls back to CSS default */
+  /* Dynamic Watermark Content */
   [data-section-id="{{ section.id }}"] .featured-section::before {
     content: '{{ section.settings.watermark_text | default: 'RYSSA' }}';
   }
@@ -132,19 +130,19 @@
     {
       "type": "color",
       "id": "bg_color",
-      "label": "Background (Blush)",
+      "label": "Background",
       "default": "#FDF5F3"
     },
     {
       "type": "color",
       "id": "accent_color",
-      "label": "Accent (Gold)",
+      "label": "Accent",
       "default": "#CBB674"
     },
     {
       "type": "color",
       "id": "heading_color",
-      "label": "Heading (Plum)",
+      "label": "Heading",
       "default": "#351E28"
     },
     {
@@ -164,11 +162,11 @@
 
 {% stylesheet %}
   /* ========================================
-     FEATURED SECTION - THE EDIT
+     FEATURED SECTION STYLES
      ======================================== */
 
   .featured-section {
-    /* Fallback variables if not set by schema */
+    /* Fallback variables */
     --color-blush: #FDF5F3;
     --color-plum: #351E28;
     --color-gold: #CBB674;
@@ -187,7 +185,7 @@
 
   /* Decorative Watermark */
   .featured-section::before {
-    content: 'RYSSA'; /* Overridden by schema setting in style block */
+    content: 'RYSSA'; 
     position: absolute;
     top: 50%;
     left: 50%;
@@ -246,24 +244,31 @@
     margin: 0;
   }
 
-  /* Editorial Grid for Featured Section */
+  /* Editorial Grid */
   .featured-section .product-grid__items {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: var(--spacing-xl);
   }
 
-  /* Basic Card Styles (In case they aren't global) */
+  /* Product Card Images - ROBUST PADDING HACK */
+  /* This fixes the "cut off" issue by forcing height via padding */
   .product-card__image {
     position: relative;
-    aspect-ratio: 3 / 4;
-    margin-bottom: 24px;
+    width: 100%;
+    /* Force 3:4 Aspect Ratio (4/3 = 1.333) */
+    padding-top: 133.33%; 
+    height: 0; 
     overflow: hidden;
     background-color: #F8F6F3;
+    margin-bottom: 24px;
   }
   
   .product-card__image img,
   .product-card__image svg {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
