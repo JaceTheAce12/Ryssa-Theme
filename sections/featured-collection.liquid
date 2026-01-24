@@ -2,7 +2,7 @@
   ----------------------------------------------------------------------------------
   RYSSA FEATURED SECTION (EDITOR'S PICKS)
   - Style: Editorial Grid with background watermark
-  - Fix: Applied padding-hack to images to prevent cutoff/height collapse
+  - Fix: Removed overflow:hidden from main container to prevent product cutoff
   ----------------------------------------------------------------------------------
 {%- endcomment -%}
 
@@ -16,12 +16,15 @@
   }
   
   /* Dynamic Watermark Content */
-  [data-section-id="{{ section.id }}"] .featured-section::before {
+  [data-section-id="{{ section.id }}"] .featured-section__background::before {
     content: '{{ section.settings.watermark_text | default: 'RYSSA' }}';
   }
 </style>
 
 <section class="featured-section section" data-section-id="{{ section.id }}">
+  
+  <div class="featured-section__background"></div>
+
   <div class="container">
     
     <header class="section-header fade-in">
@@ -180,11 +183,23 @@
     background-color: var(--color-blush);
     padding: clamp(var(--spacing-2xl), 12vw, var(--spacing-3xl)) var(--spacing-md);
     position: relative;
-    overflow: hidden;
+    /* REMOVED overflow: hidden from main section to prevent clipping content */
+  }
+
+  /* Separate Background Layer for Decorations */
+  .featured-section__background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* Keep watermark clipped here */
+    pointer-events: none;
+    z-index: 0;
   }
 
   /* Decorative Watermark */
-  .featured-section::before {
+  .featured-section__background::before {
     content: 'RYSSA'; 
     position: absolute;
     top: 50%;
@@ -195,11 +210,11 @@
     font-weight: var(--font-light);
     color: rgba(0, 0, 0, 0.02);
     letter-spacing: 0.1em;
-    pointer-events: none;
     user-select: none;
   }
 
-  .featured-section::after {
+  /* Decorative Gradient */
+  .featured-section__background::after {
     content: '';
     position: absolute;
     top: 0;
@@ -211,12 +226,11 @@
       rgba(232, 196, 196, 0.3) 0%,
       transparent 70%
     );
-    pointer-events: none;
   }
 
   .featured-section .container {
     position: relative;
-    z-index: 1;
+    z-index: 1; /* Place content above background */
     max-width: 1440px;
     margin: 0 auto;
   }
@@ -252,12 +266,11 @@
   }
 
   /* Product Card Images - ROBUST PADDING HACK */
-  /* This fixes the "cut off" issue by forcing height via padding */
+  /* This forces height to be exactly 3:4 aspect ratio */
   .product-card__image {
     position: relative;
     width: 100%;
-    /* Force 3:4 Aspect Ratio (4/3 = 1.333) */
-    padding-top: 133.33%; 
+    padding-top: 133.33%; /* 4/3 Aspect Ratio */
     height: 0; 
     overflow: hidden;
     background-color: #F8F6F3;
@@ -305,10 +318,6 @@
 
   /* Mobile */
   @media (max-width: 768px) {
-    .featured-section::after {
-      width: 150px;
-      height: 150px;
-    }
     .product-grid__items {
       grid-template-columns: 1fr;
     }
