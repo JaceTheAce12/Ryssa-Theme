@@ -1,7 +1,9 @@
 {%- comment -%}
   ----------------------------------------------------------------------------------
   RYSSA HEADER - Custom Implementation
-  Includes: Inline Search Bar, Mobile Logic, and Animations
+  Includes: HTML Structure, Schema Settings, CSS Design System, and Interactivity JS
+  - Fix: Restored Menu Hover Effects (Pale Blue Underline)
+  - Fix: Logo overlap constraints & Search Toggle logic included
   ----------------------------------------------------------------------------------
 {%- endcomment -%}
 
@@ -174,21 +176,63 @@
 
 {% stylesheet %}
   /* ========================================
-     CSS VARIABLES & RESET
+     CSS CUSTOM PROPERTIES
      ======================================== */
+
   :root {
+    /* Colors - Neutrals */
     --color-white: #FFFFFF;
+    --color-cloud: #F8F6F3;
+    --color-sand: #E3DAC9;
+    --color-taupe: #CAB9A9;
+    --color-mocha: #A89788;
+    --color-charcoal: #3A3632;
     --color-black: #1A1A1A;
-    --color-border-light: #E8E8E8;
-    --font-display: 'Playfair Display', serif;
-    --font-body: 'Inter', sans-serif;
-    --duration-base: 300ms;
+
+    /* Colors - Accent */
+    --color-accent-primary: #8B7355;
+    --color-accent-secondary: #2C3E50;
+
+    /* Colors - Primary Accent (Pale Blue) */
+    --color-primary: #e9f5ff;
+    --color-primary-hover: #d4ecff; /* Pale Blue for Hovers */
+    --color-primary-dark: #c0e3ff;
+
+    /* Colors - Semantic */
+    --color-text-primary: var(--color-black);
+    --color-text-secondary: #525252;
+    --color-background-primary: var(--color-white);
+    --color-background-secondary: var(--color-cloud);
+
+    /* Typography */
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    
+    --text-base: 1rem;
+    --text-xl: 1.563rem;
+
+    /* Spacing */
+    --spacing-xs: 8px;
+    --spacing-sm: 16px;
+    --spacing-md: 24px;
+    --spacing-xl: 48px;
+    --spacing-2xl: 80px;
+
+    /* Animation */
+    --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
     --ease-default: ease;
+    --duration-fast: 150ms;
+    --duration-base: 300ms;
+
+    /* Border Colors */
+    --color-border-light: #E8E8E8;
+    --color-border-subtle: rgba(0, 0, 0, 0.08);
   }
 
   /* ========================================
      SITE HEADER STYLES
      ======================================== */
+
   .site-header {
     position: fixed;
     top: 0;
@@ -200,6 +244,10 @@
     transition: transform var(--duration-base) var(--ease-default);
   }
 
+  .site-header--hidden {
+    transform: translateY(-100%);
+  }
+
   .site-header__inner {
     display: flex;
     align-items: center;
@@ -207,13 +255,23 @@
     height: 80px;
     max-width: 1440px;
     margin: 0 auto;
-    padding: 0 24px;
-    background-color: var(--color-white); /* Ensure background obscures content */
+    padding: 0 var(--spacing-md);
+    background-color: var(--color-white);
     position: relative;
-    z-index: 20; /* Above search bar layer */
+    z-index: 20;
   }
 
-  /* Navigation */
+  .site-header__logo svg {
+    display: block;
+    color: var(--color-black);
+    transition: opacity var(--duration-fast) var(--ease-default);
+  }
+
+  .site-header__logo:hover svg {
+    opacity: 0.7;
+  }
+
+  /* --- Desktop Navigation (Restored Hover Styles) --- */
   .site-header__nav {
     position: absolute;
     left: 50%;
@@ -222,59 +280,184 @@
 
   .site-header__menu {
     display: flex;
-    gap: 32px;
+    gap: var(--spacing-xl);
     list-style: none;
     margin: 0;
     padding: 0;
   }
 
   .site-header__menu a {
-    text-decoration: none;
-    color: var(--color-black);
-    font-family: var(--font-body);
     font-size: 14px;
+    font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.1em;
+    text-decoration: none;
+    color: inherit;
+    transition: color var(--duration-fast) var(--ease-default);
+    position: relative;
   }
 
-  /* Actions */
+  /* Restored Pale Blue Underline Effect */
+  .site-header__menu a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: var(--color-primary-hover);
+    transition: width var(--duration-base) var(--ease-smooth);
+  }
+
+  .site-header__menu a:hover,
+  .site-header__menu a.active {
+    color: var(--color-accent-primary);
+  }
+
+  .site-header__menu a:hover::after,
+  .site-header__menu a.active::after {
+    width: 100%;
+  }
+
+  .site-header__menu a:active {
+    color: var(--color-charcoal);
+  }
+
+  /* --- Mobile Menu Toggle (Fixed Alignment) --- */
+  .site-header__menu-toggle {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    padding: 8px;
+    min-width: 44px;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 10;
+  }
+
+  .site-header__menu-toggle span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background-color: var(--color-black);
+    transition: all var(--duration-base) var(--ease-smooth);
+  }
+
+  /* Hamburger Animation: Move THEN Rotate for perfect center */
+  .site-header__menu-toggle[aria-expanded="true"] span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+
+  .site-header__menu-toggle[aria-expanded="true"] span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .site-header__menu-toggle[aria-expanded="true"] span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  /* --- Header Actions --- */
   .site-header__actions {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: var(--spacing-sm);
   }
 
   .site-header__action-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
     color: var(--color-black);
-    padding: 4px;
+    transition: opacity var(--duration-fast) var(--ease-default);
   }
 
-  /* Cart Badge */
-  .site-header__cart { position: relative; }
+  .site-header__action-btn:hover {
+    opacity: 0.6;
+  }
+
+  .site-header__action-btn:active {
+    opacity: 0.4;
+  }
+
+  .site-header__cart {
+    position: relative;
+  }
+
   .cart-count {
     position: absolute;
-    top: -2px;
-    right: -4px;
-    background: var(--color-black);
-    color: var(--color-white);
-    font-size: 10px;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
+    top: var(--spacing-xs);
+    right: var(--spacing-xs);
     display: flex;
     align-items: center;
     justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--color-white);
+    background-color: var(--color-black);
+    border-radius: 50%;
+    line-height: 1;
   }
 
-  /* ========================================
-     INLINE SEARCH BAR CSS
-     ======================================== */
+  /* --- Mobile Navigation Overlay --- */
+  .mobile-nav-overlay {
+    position: fixed;
+    top: 80px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--color-white);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--duration-base) var(--ease-default),
+                visibility var(--duration-base) var(--ease-default);
+  }
+
+  .mobile-nav-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .mobile-nav {
+    padding: var(--spacing-xl) var(--spacing-md);
+  }
+
+  .mobile-nav__menu {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .mobile-nav__menu a {
+    font-size: var(--text-xl);
+    font-family: var(--font-display);
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid var(--color-border-subtle);
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    transition: color var(--duration-fast) var(--ease-default),
+                background-color var(--duration-fast) var(--ease-default);
+  }
+
+  .mobile-nav__menu a:hover {
+    color: var(--color-accent-primary);
+    background-color: rgba(139, 115, 85, 0.08);
+  }
+
+  /* --- INLINE SEARCH BAR --- */
   .site-header__search-bar {
     position: absolute;
     top: 0;
@@ -282,18 +465,15 @@
     width: 100%;
     height: 100%;
     background-color: var(--color-white);
-    z-index: 30; /* Sit on top of everything inside header */
+    z-index: 30;
     display: flex;
     align-items: center;
-    
-    /* Animation State: Hidden (Slide Up) */
     opacity: 0;
     visibility: hidden;
     transform: translateY(-10px);
     transition: all 0.3s ease;
   }
 
-  /* Animation State: Active (Slide Down) */
   .site-header__search-bar.active {
     opacity: 1;
     visibility: visible;
@@ -341,47 +521,20 @@
     align-items: center;
   }
 
-  .search-form__close:hover {
-    opacity: 0.6;
-  }
-
   /* ========================================
-     MOBILE & RESPONSIVE FIXES
+     RESPONSIVE BREAKPOINTS
      ======================================== */
-  
-  .site-header__menu-toggle {
-    display: none;
-    flex-direction: column;
-    gap: 5px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    position: relative;
-    z-index: 10;
-  }
 
-  .site-header__menu-toggle span {
-    width: 24px;
-    height: 2px;
-    background-color: var(--color-black);
-    transition: all 0.3s ease;
-  }
-
-  /* Hamburger Animation */
-  .site-header__menu-toggle[aria-expanded="true"] span:nth-child(1) {
-    transform: translateY(7px) rotate(45deg);
-  }
-  .site-header__menu-toggle[aria-expanded="true"] span:nth-child(2) {
-    opacity: 0;
-  }
-  .site-header__menu-toggle[aria-expanded="true"] span:nth-child(3) {
-    transform: translateY(-7px) rotate(-45deg);
-  }
-
+  /* Tablet (768px) */
   @media (max-width: 768px) {
-    .site-header__nav { display: none; }
-    .site-header__menu-toggle { display: flex; }
-    
+    .site-header__nav {
+      display: none;
+    }
+
+    .site-header__menu-toggle {
+      display: flex;
+    }
+
     .site-header__logo {
       position: absolute;
       left: 50%;
@@ -389,44 +542,34 @@
       z-index: 1;
       display: flex;
       justify-content: center;
-      max-width: 50%; /* Prevent overlap on standard mobile */
+      max-width: 50%; /* Prevent overlapping */
+    }
+    
+    .site-header__logo img,
+    .site-header__logo svg {
+      max-width: 100%;
+      height: auto;
     }
 
-    /* Tighter spacing for mobile icons */
     .site-header__actions {
-      gap: 8px;
+      gap: 8px; /* Tighter gap on tablet */
       position: relative;
       z-index: 10;
     }
   }
 
-  /* TINY SCREEN FIX (<400px) */
+  /* Tiny Screens (<400px) FIX */
   @media (max-width: 400px) {
-    .site-header__inner { padding: 0 12px; }
-    
+    .site-header__inner {
+      padding: 0 12px;
+    }
     .site-header__logo {
-      max-width: 100px; /* Aggressively shrink logo to fit */
+      max-width: 100px; /* Aggressive fix for logo overlap */
     }
-    
     .site-header__actions {
-      gap: 4px; /* Minimal gap between search/cart */
+      gap: 4px; /* Minimal gap */
     }
   }
-
-  /* Mobile Nav Overlay */
-  .mobile-nav-overlay {
-    position: fixed;
-    top: 80px; left: 0; right: 0; bottom: 0;
-    background: var(--color-white);
-    z-index: 999;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-  }
-  .mobile-nav-overlay.active { opacity: 1; visibility: visible; }
-  .mobile-nav { padding: 40px 24px; }
-  .mobile-nav__menu { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 24px; }
-  .mobile-nav__menu a { font-size: 24px; text-decoration: none; color: var(--color-black); font-family: var(--font-display); }
 {% endstylesheet %}
 
 <script>
@@ -442,7 +585,6 @@
       this.closeBtn = document.querySelector('.js-search-close');
       this.searchBar = document.querySelector('.site-header__search-bar');
       this.input = document.querySelector('.search-form__input');
-      this.header = document.querySelector('.site-header');
 
       if (this.trigger && this.searchBar) {
         this.init();
@@ -450,16 +592,13 @@
     }
 
     init() {
-      // Open Search
       this.trigger.addEventListener('click', (e) => {
         e.preventDefault();
         this.open();
       });
 
-      // Close Search
       this.closeBtn.addEventListener('click', () => this.close());
 
-      // Close on Escape Key
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && this.isOpen()) {
           this.close();
@@ -470,7 +609,6 @@
     open() {
       this.searchBar.classList.add('active');
       this.searchBar.setAttribute('aria-hidden', 'false');
-      // Wait for animation to finish slightly before focusing to avoid jumpiness
       setTimeout(() => this.input.focus(), 100);
     }
 
@@ -485,7 +623,7 @@
   }
 
   /* ========================================
-     MOBILE MENU & SCROLL (Existing Logic)
+     MOBILE MENU & SCROLL LOGIC
      ======================================== */
   class HeaderLogic {
     constructor() {
@@ -523,7 +661,6 @@
     }
   }
 
-  // Initialize
   document.addEventListener('DOMContentLoaded', () => {
     new SearchToggle();
     new HeaderLogic();
