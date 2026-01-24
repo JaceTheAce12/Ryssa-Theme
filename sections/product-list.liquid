@@ -1,12 +1,3 @@
-{%- comment -%}
-  ----------------------------------------------------------------------------------
-  RYSSA LOOKBOOK GRID
-  - Style: Asymmetrical Masonry (12-column grid)
-  - Features: Editorial Badges, Captions, Featured Cards (Span 7 cols)
-  - Mobile: Stacks vertically for readability
-  ----------------------------------------------------------------------------------
-{%- endcomment -%}
-
 <section class="ryssa-section section" data-section-id="{{ section.id }}">
   <div class="ryssa-container">
     
@@ -188,29 +179,25 @@
     margin-top: var(--spacing-2xl);
   }
 
-  /* --- CARD LAYOUTS --- */
+  /* --- CARD LAYOUTS (FIXED CENTERING) --- */
   
-  /* Standard Cards (Span 5) */
+  /* Standard Cards (Span 6 = Exactly 50% width) */
   .ryssa-card {
     display: block;
     position: relative;
-    grid-column: span 5; /* From CSS provided */
+    grid-column: span 6; /* Changed from 5 to 6 to fill row and center */
   }
 
-  /* Featured Cards (Span 7) */
+  /* Featured Cards (Span 12 = Full width) */
   .ryssa-card--featured {
-    grid-column: span 7; /* From CSS provided */
+    grid-column: span 12; /* Changed from 7 to 12 to center large items */
   }
 
   /* Offset Pattern (Desktop Only) */
+  /* Updated offsets to work with new 6/12 layout */
   @media screen and (min-width: 990px) {
-    .ryssa-lookbook-grid .ryssa-card:nth-child(2) {
-      margin-top: var(--spacing-2xl);
-    }
-    .ryssa-lookbook-grid .ryssa-card:nth-child(3) {
-      margin-top: calc(-1 * var(--spacing-xl));
-    }
-    .ryssa-lookbook-grid .ryssa-card:nth-child(5) {
+    /* Push every second card down slightly for "staggered" look if desired */
+    .ryssa-lookbook-grid .ryssa-card:nth-child(even) {
       margin-top: var(--spacing-xl);
     }
   }
@@ -348,7 +335,7 @@
     }
     
     /* Reset offsets */
-    .ryssa-lookbook-grid .ryssa-card:nth-child(n) {
+    .ryssa-lookbook-grid .ryssa-card:nth-child(even) {
       margin-top: 0;
     }
   }
