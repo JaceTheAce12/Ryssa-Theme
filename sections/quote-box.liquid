@@ -1,0 +1,220 @@
+{%- comment -%}
+  ----------------------------------------------------------------------------------
+  RYSSA EDITORIAL QUOTE BLOCK
+  - Style: Magazine Pull Quote with Decorative Mark
+  - Features: Parallax Background Pattern, Fade-in
+  ----------------------------------------------------------------------------------
+{%- endcomment -%}
+
+<style>
+  /* Map Schema Settings to CSS Variables for this specific section */
+  [data-section-id="{{ section.id }}"] .quote-block {
+    --color-plum: {{ section.settings.bg_color }};
+    --color-white: {{ section.settings.text_color }};
+    --color-gold: {{ section.settings.accent_color }};
+  }
+  
+  /* Calculate a subtle color for the giant quote mark based on text color */
+  [data-section-id="{{ section.id }}"] .quote-block__decorative-quote {
+    color: {{ section.settings.text_color | color_modify: 'alpha', 0.15 }};
+  }
+</style>
+
+<section class="quote-block fade-in" data-section-id="{{ section.id }}">
+  <div class="quote-block__decorative-quote" aria-hidden="true">"</div>
+  
+  <div class="quote-block__inner">
+    <blockquote>
+      {%- if section.settings.quote != blank -%}
+        <div class="quote-text">
+          {{ section.settings.quote }}
+        </div>
+      {%- endif -%}
+      
+      {%- if section.settings.author != blank -%}
+        <footer><cite>{{ section.settings.author }}</cite></footer>
+      {%- endif -%}
+    </blockquote>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Editorial Quote",
+  "tag": "section",
+  "class": "section-quote",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "richtext",
+      "id": "quote",
+      "label": "Quote",
+      "default": "<p><em>Fashion is about something that comes from within you.</em></p>"
+    },
+    {
+      "type": "text",
+      "id": "author",
+      "label": "Author",
+      "default": "Ralph Lauren"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#351E28"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent Color (Border)",
+      "default": "#CBB674"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Editorial Quote"
+    }
+  ]
+}
+{% endschema %}
+
+{% stylesheet %}
+  /* ========================================
+     QUOTE BLOCK CSS
+     ======================================== */
+
+  .quote-block {
+    /* Local defaults if variables aren't set globally */
+    --spacing-md: 24px;
+    --spacing-lg: 32px;
+    --spacing-xl: 48px;
+    --spacing-3xl: 120px;
+    --spacing-4xl: 160px;
+    --font-editorial: 'Bodoni Moda', 'Didot', 'Playfair Display', serif;
+    --font-body: 'Inter', sans-serif;
+
+    padding: clamp(var(--spacing-3xl), 16vw, var(--spacing-4xl)) var(--spacing-md);
+    background-color: var(--color-plum);
+    color: var(--color-white);
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Decorative Background Pattern */
+  .quote-block::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: -100px;
+    transform: translateY(-50%);
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(
+      circle,
+      rgba(232, 196, 196, 0.08) 0%,
+      transparent 70%
+    );
+    pointer-events: none;
+  }
+
+  /* Large Decorative Quotation Mark */
+  .quote-block__decorative-quote {
+    position: absolute;
+    top: var(--spacing-xl);
+    left: clamp(var(--spacing-md), 5vw, var(--spacing-3xl));
+    font-family: var(--font-editorial);
+    font-size: clamp(10rem, 15vw, 18rem);
+    font-weight: 300; /* Light */
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+    /* Color handled via inline style for opacity */
+  }
+
+  .quote-block__inner {
+    max-width: 900px;
+    margin: 0 auto;
+    padding-left: clamp(var(--spacing-md), 5vw, var(--spacing-3xl));
+    position: relative;
+    z-index: 1;
+  }
+
+  .quote-block blockquote {
+    font-style: normal;
+    border-left: 3px solid var(--color-gold);
+    padding-left: var(--spacing-xl);
+    margin: 0;
+  }
+
+  /* Target the P tag inside the RTE content */
+  .quote-block .quote-text p {
+    font-family: var(--font-editorial);
+    font-size: clamp(2rem, 5vw, 4rem);
+    font-weight: 400; /* Regular */
+    font-style: italic;
+    line-height: 1.3;
+    letter-spacing: 0.02em;
+    margin-bottom: var(--spacing-lg);
+  }
+  
+  /* Ensure italics in RTE are respected if user adds them */
+  .quote-block .quote-text em {
+    font-style: italic;
+  }
+
+  .quote-block cite {
+    display: block;
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 600;
+    font-style: normal;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    opacity: 0.7;
+    margin-top: var(--spacing-md);
+  }
+
+  /* Mobile Adjustments */
+  @media (max-width: 768px) {
+    .quote-block {
+      text-align: center;
+      padding: 80px 24px;
+    }
+
+    .quote-block__decorative-quote {
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 8rem;
+      top: 24px;
+    }
+
+    .quote-block__inner {
+      padding-left: 0;
+    }
+
+    .quote-block blockquote {
+      border-left: none;
+      border-top: 3px solid var(--color-gold);
+      padding-left: 0;
+      padding-top: 24px;
+    }
+
+    .quote-block .quote-text p {
+      font-size: clamp(1.5rem, 6vw, 2.5rem);
+    }
+  }
+{% endstylesheet %}
