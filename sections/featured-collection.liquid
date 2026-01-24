@@ -1,8 +1,9 @@
 {%- comment -%}
   ----------------------------------------------------------------------------------
-  RYSSA FEATURED SECTION (EDITOR'S PICKS)
-  - Style: Editorial Grid with background watermark
-  - Fix: Increased padding and min-height to ensure all content is visible
+  RYSSA FEATURED SECTION (Standard Layout)
+  - Layout: Standard Document Flow (No height hacks)
+  - Background: Contains the watermark securely
+  - Grid: Standard CSS Grid that pushes the section height naturally
   ----------------------------------------------------------------------------------
 {%- endcomment -%}
 
@@ -16,14 +17,14 @@
   }
   
   /* Dynamic Watermark Content */
-  [data-section-id="{{ section.id }}"] .featured-section__watermark::before {
+  [data-section-id="{{ section.id }}"] .featured-section__watermark {
     content: '{{ section.settings.watermark_text | default: 'RYSSA' }}';
   }
 </style>
 
 <section class="featured-section section" data-section-id="{{ section.id }}">
   
-  <div class="featured-section__watermark"></div>
+  <div class="featured-section__watermark" aria-hidden="true">{{ section.settings.watermark_text | default: 'RYSSA' }}</div>
   <div class="featured-section__gradient"></div>
 
   <div class="container">
@@ -45,17 +46,19 @@
         {%- for product in collection.products limit: limit -%}
           <article class="product-card fade-in">
             <a href="{{ product.url }}" class="product-card__link">
-              <div class="product-card__image">
-                {%- if product.featured_media -%}
-                  {{ product.featured_media | image_url: width: 800 | image_tag: 
-                    loading: 'lazy',
-                    width: product.featured_media.width,
-                    height: product.featured_media.height,
-                    alt: product.title | escape
-                  }}
-                {%- else -%}
-                  {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
-                {%- endif -%}
+              <div class="product-card__image-wrapper">
+                <div class="product-card__image">
+                  {%- if product.featured_media -%}
+                    {{ product.featured_media | image_url: width: 800 | image_tag: 
+                      loading: 'lazy',
+                      width: product.featured_media.width,
+                      height: product.featured_media.height,
+                      alt: product.title | escape
+                    }}
+                  {%- else -%}
+                    {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                  {%- endif -%}
+                </div>
               </div>
               <div class="product-card__info">
                 <h3 class="product-card__title">{{ product.title }}</h3>
@@ -70,9 +73,11 @@
         {%- for i in (1..limit) -%}
           <article class="product-card fade-in">
             <a href="#" class="product-card__link">
-              <div class="product-card__image">
-                {%- capture placeholder_index -%}{% cycle 1, 2, 3, 4, 5, 6 %}{%- endcapture -%}
-                {{ 'product-' | append: placeholder_index | placeholder_svg_tag: 'placeholder-svg' }}
+              <div class="product-card__image-wrapper">
+                <div class="product-card__image">
+                  {%- capture placeholder_index -%}{% cycle 1, 2, 3, 4, 5, 6 %}{%- endcapture -%}
+                  {{ 'product-' | append: placeholder_index | placeholder_svg_tag: 'placeholder-svg' }}
+                </div>
               </div>
               <div class="product-card__info">
                 <h3 class="product-card__title">Editor's Pick {{ i }}</h3>
@@ -166,7 +171,7 @@
 
 {% stylesheet %}
   /* ========================================
-     FEATURED SECTION STYLES
+     FEATURED SECTION STYLES (Standard Flow)
      ======================================== */
 
   .featured-section {
@@ -179,34 +184,21 @@
     
     background-color: var(--color-blush);
     
-    /* PADDING UPDATE: Increased to prevent cut-off */
-    padding-top: 140px; 
-    padding-bottom: 160px; /* Generous bottom space */
-    padding-left: 24px;
-    padding-right: 24px;
+    /* Standard Padding */
+    padding: 100px 24px;
     
-    /* HEIGHT FIX: Ensure section is tall enough */
-    min-height: 800px;
-    height: auto;
-    
+    /* Normal Block Layout */
     position: relative;
-    /* Do not use overflow:hidden here or it clips the grid */
-  }
-
-  /* Decorative Watermark (Clipped to Background only) */
-  .featured-section__watermark {
-    position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
-    height: 100%;
-    overflow: hidden; /* Clips the giant text */
-    pointer-events: none;
-    z-index: 0;
+    height: auto; /* Allow section to grow with content */
+    display: block;
+    
+    /* Clip background decorations so they don't bleed out */
+    overflow: hidden; 
   }
 
-  .featured-section__watermark::before {
-    content: 'RYSSA'; 
+  /* Decorative Watermark */
+  .featured-section__watermark {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -218,6 +210,8 @@
     letter-spacing: 0.1em;
     user-select: none;
     white-space: nowrap;
+    z-index: 0;
+    pointer-events: none;
   }
 
   /* Decorative Gradient */
@@ -238,15 +232,15 @@
 
   .featured-section .container {
     position: relative;
-    z-index: 1; /* Content above decoration */
+    z-index: 1; /* Place content above background */
     max-width: 1440px;
     margin: 0 auto;
-    height: 100%; /* Ensure container fills section */
+    width: 100%;
   }
 
   .featured-section .section-header {
     text-align: center;
-    margin-bottom: 80px;
+    margin-bottom: 60px;
   }
 
   .featured-section .eyebrow {
@@ -267,14 +261,12 @@
     margin: 0;
   }
 
-  /* Editorial Grid */
-  .featured-section .product-grid__items {
+  /* Standard Grid */
+  .product-grid__items {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 48px;
+    gap: 40px;
     width: 100%;
-    /* Ensure grid height calculates correctly */
-    height: auto; 
   }
 
   /* Product Card */
@@ -288,36 +280,26 @@
     text-decoration: none;
     color: inherit;
     display: block;
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform 0.3s ease;
   }
 
   .product-card:hover .product-card__link {
-    transform: translateY(-8px);
+    transform: translateY(-5px);
   }
 
-  /* Image Container - Using Aspect Ratio */
+  /* Image Wrapper */
+  .product-card__image-wrapper {
+    width: 100%;
+    margin-bottom: 24px;
+    background-color: #F8F6F3;
+  }
+
   .product-card__image {
     position: relative;
     width: 100%;
+    /* Standard Aspect Ratio */
     aspect-ratio: 3 / 4; 
     overflow: hidden;
-    background-color: #F8F6F3;
-    margin-bottom: 24px;
-    border-radius: 2px;
-  }
-  
-  /* Fallback for older browsers */
-  @supports not (aspect-ratio: 3 / 4) {
-    .product-card__image {
-      padding-top: 133.33%;
-      height: 0;
-    }
-    .product-card__image img,
-    .product-card__image svg {
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
   }
   
   .product-card__image img,
@@ -359,8 +341,7 @@
   /* Mobile */
   @media (max-width: 768px) {
     .featured-section {
-      padding-top: 80px;
-      padding-bottom: 80px;
+      padding: 60px 24px;
     }
     .product-grid__items {
       grid-template-columns: 1fr;
