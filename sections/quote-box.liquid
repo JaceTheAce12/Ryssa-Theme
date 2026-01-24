@@ -3,20 +3,20 @@
   RYSSA EDITORIAL QUOTE BLOCK
   - Style: Magazine Pull Quote with Decorative Mark
   - Features: Parallax Background Pattern, Fade-in
-  - Dependencies: assets/animations.js (for fade-in visibility)
+  - Dependencies: assets/animations.js
   ----------------------------------------------------------------------------------
 {%- endcomment -%}
 
 <style>
-  /* Map Schema Settings to CSS Variables for this specific section */
-  [data-section-id="{{ section.id }}"] .quote-block {
+  /* FIX: Target the element that has BOTH the class and the data attribute */
+  .quote-block[data-section-id="{{ section.id }}"] {
     --color-plum: {{ section.settings.bg_color }};
     --color-white: {{ section.settings.text_color }};
     --color-gold: {{ section.settings.accent_color }};
   }
   
   /* Calculate a subtle color for the giant quote mark based on text color */
-  [data-section-id="{{ section.id }}"] .quote-block__decorative-quote {
+  .quote-block[data-section-id="{{ section.id }}"] .quote-block__decorative-quote {
     color: {{ section.settings.text_color | color_modify: 'alpha', 0.15 }};
   }
 </style>
