@@ -52,7 +52,7 @@
         "eyebrow": "Curated Selection",
         "title": "Editor's Picks",
         "watermark_text": "RYSSA",
-        "collection": "featured-collection",
+        "collection": "frontpage",
         "products_to_show": 3,
         "bg_color": "#fdf5f3",
         "accent_color": "#cbb674",
