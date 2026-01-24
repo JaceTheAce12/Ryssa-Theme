@@ -2,7 +2,7 @@
   ----------------------------------------------------------------------------------
   RYSSA FEATURED SECTION (EDITOR'S PICKS)
   - Style: Editorial Grid with background watermark
-  - Fix: Removed overflow:hidden from main container to prevent product cutoff
+  - Fix: Used aspect-ratio + overflow:hidden to contain layout and prevent overlap
   ----------------------------------------------------------------------------------
 {%- endcomment -%}
 
@@ -16,14 +16,15 @@
   }
   
   /* Dynamic Watermark Content */
-  [data-section-id="{{ section.id }}"] .featured-section__background::before {
+  [data-section-id="{{ section.id }}"] .featured-section__watermark::before {
     content: '{{ section.settings.watermark_text | default: 'RYSSA' }}';
   }
 </style>
 
 <section class="featured-section section" data-section-id="{{ section.id }}">
   
-  <div class="featured-section__background"></div>
+  <div class="featured-section__watermark"></div>
+  <div class="featured-section__gradient"></div>
 
   <div class="container">
     
@@ -175,47 +176,44 @@
     --color-gold: #CBB674;
     --font-editorial: 'Bodoni Moda', 'Didot', 'Playfair Display', serif;
     --font-light: 300;
-    --spacing-md: 24px;
-    --spacing-xl: 48px;
-    --spacing-2xl: 80px;
-    --spacing-3xl: 120px;
-
+    
     background-color: var(--color-blush);
-    padding: clamp(var(--spacing-2xl), 12vw, var(--spacing-3xl)) var(--spacing-md);
+    /* Generous padding ensures content doesn't touch edges */
+    padding-top: clamp(80px, 12vw, 120px);
+    padding-bottom: 120px; 
+    padding-left: 24px;
+    padding-right: 24px;
+    
     position: relative;
-    /* REMOVED overflow: hidden from main section to prevent clipping content */
-  }
-
-  /* Separate Background Layer for Decorations */
-  .featured-section__background {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden; /* Keep watermark clipped here */
-    pointer-events: none;
-    z-index: 0;
+    /* CRITICAL: Keep overflow hidden to prevent bleed, but use padding to show content */
+    overflow: hidden; 
   }
 
   /* Decorative Watermark */
-  .featured-section__background::before {
-    content: 'RYSSA'; 
+  .featured-section__watermark {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    width: 100%;
+    text-align: center;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .featured-section__watermark::before {
+    content: 'RYSSA'; 
     font-family: var(--font-editorial);
     font-size: clamp(8rem, 15vw, 15rem);
     font-weight: var(--font-light);
     color: rgba(0, 0, 0, 0.02);
     letter-spacing: 0.1em;
     user-select: none;
+    white-space: nowrap;
   }
 
   /* Decorative Gradient */
-  .featured-section__background::after {
-    content: '';
+  .featured-section__gradient {
     position: absolute;
     top: 0;
     right: 0;
@@ -226,6 +224,8 @@
       rgba(232, 196, 196, 0.3) 0%,
       transparent 70%
     );
+    pointer-events: none;
+    z-index: 0;
   }
 
   .featured-section .container {
@@ -237,7 +237,7 @@
 
   .featured-section .section-header {
     text-align: center;
-    margin-bottom: var(--spacing-2xl);
+    margin-bottom: 60px;
   }
 
   .featured-section .eyebrow {
@@ -262,26 +262,56 @@
   .featured-section .product-grid__items {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: var(--spacing-xl);
+    gap: 48px;
+    width: 100%;
   }
 
-  /* Product Card Images - ROBUST PADDING HACK */
-  /* This forces height to be exactly 3:4 aspect ratio */
+  /* Product Card */
+  .product-card {
+    display: block;
+    position: relative;
+    width: 100%;
+  }
+
+  .product-card__link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .product-card:hover .product-card__link {
+    transform: translateY(-8px);
+  }
+
+  /* Image Container - Using Aspect Ratio instead of padding hack */
   .product-card__image {
     position: relative;
     width: 100%;
-    padding-top: 133.33%; /* 4/3 Aspect Ratio */
-    height: 0; 
+    /* Modern Fix: Calculates height automatically, preventing collapse */
+    aspect-ratio: 3 / 4; 
     overflow: hidden;
     background-color: #F8F6F3;
     margin-bottom: 24px;
+    border-radius: 2px;
+  }
+  
+  /* Fallback for old browsers if needed, typically not required for modern Shopify */
+  @supports not (aspect-ratio: 3 / 4) {
+    .product-card__image {
+      padding-top: 133.33%;
+      height: 0;
+    }
+    .product-card__image img,
+    .product-card__image svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
   }
   
   .product-card__image img,
   .product-card__image svg {
-    position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -318,8 +348,13 @@
 
   /* Mobile */
   @media (max-width: 768px) {
+    .featured-section::after {
+      width: 150px;
+      height: 150px;
+    }
     .product-grid__items {
       grid-template-columns: 1fr;
+      gap: 32px;
     }
   }
 {% endstylesheet %}
