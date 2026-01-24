@@ -16,11 +16,8 @@
         "desktop_media_type": "image",
         "image_desktop": "shopify://shop_images/a-hero-image-for-a-fashion-landing-page.png",
         "mobile_media_type": "image",
-        "overlay_color": "#12121266",
-        "overlay_opacity": 60,
-        "show_accent_line": true,
-        "eyebrow": "Spring 2026",
-        "title": "Ethereal Minimalism",
+        "title_line_1": "Ethereal",
+        "title_line_2": "Minimalism",
         "text": "Where simplicity meets sophistication",
         "link_text": "Explore Collection",
         "link": "shopify://collections"
@@ -28,10 +25,11 @@
     },
     "product_list_fa6P9H": {
       "type": "product-list",
-      "name": "Featured collection",
+      "name": "Product List",
       "settings": {
         "eyebrow": "New Arrivals",
         "title": "Spring Essentials",
+        "intro": "Curated pieces for the modern wardrobe, where every selection tells a story of elegance and restraint.",
         "collection": "all",
         "products_to_show": 6
       }

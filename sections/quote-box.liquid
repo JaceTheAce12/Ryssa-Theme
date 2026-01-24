@@ -218,3 +218,48 @@
     }
   }
 {% endstylesheet %}
+
+<script>
+  (function() {
+    // Scoped Fade Animation Logic for this Section
+    const initQuoteAnimation = (container) => {
+      const section = container || document.querySelector('[data-section-id="{{ section.id }}"]');
+      if(!section) return;
+
+      const fadeElements = section.querySelectorAll('.fade-in');
+      if(fadeElements.length === 0) return;
+
+      // Fallback if browser doesn't support Observer
+      if (!('IntersectionObserver' in window)) {
+        fadeElements.forEach(el => el.classList.add('visible'));
+        return;
+      }
+
+      const observerOptions = {
+        threshold: 0.2, // Trigger when 20% visible
+        rootMargin: '0px 0px -50px 0px'
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, observerOptions);
+
+      fadeElements.forEach(el => observer.observe(el));
+    };
+
+    // Initialize on Load
+    document.addEventListener('DOMContentLoaded', () => initQuoteAnimation());
+
+    // Initialize in Theme Editor
+    document.addEventListener('shopify:section:load', (e) => {
+      if(e.target.dataset.sectionId === '{{ section.id }}') {
+        initQuoteAnimation(e.target);
+      }
+    });
+  })();
+</script>
