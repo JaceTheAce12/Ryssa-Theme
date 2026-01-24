@@ -2,7 +2,7 @@
   ----------------------------------------------------------------------------------
   RYSSA HEADER - Custom Implementation
   Includes: HTML Structure, Schema Settings, CSS Design System, and Interactivity JS
-  - Fix: Added mobile z-index and max-width constraints to prevent logo overlap
+  - Fix: Added extra constraints for <400px screens to prevent logo/search overlap
   ----------------------------------------------------------------------------------
 {%- endcomment -%}
 
@@ -639,24 +639,37 @@
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
-      /* FIX: Limit width to prevent overlap with icons (Menu on left, Actions on right) */
+      /* Default Constraint for mobile/tablet */
       max-width: 50%;
       display: flex;
       justify-content: center;
       z-index: 1;
     }
     
-    /* Ensure the image inside scales down if constrained */
     .site-header__logo img,
     .site-header__logo svg {
       max-width: 100%;
       height: auto;
     }
 
+    /* Reduce gap on tablet/mobile generally */
     .site-header__actions {
-      /* FIX: Ensure actions sit above potential logo overlap */
+      gap: 8px; 
       position: relative;
       z-index: 10;
+    }
+  }
+
+  /* Tiny Screens (<400px) FIX */
+  @media (max-width: 400px) {
+    /* Aggressively restrict logo width so it cannot touch the search icon */
+    .site-header__logo {
+      max-width: 100px; 
+    }
+    
+    /* Ensure icon gap is tight */
+    .site-header__actions {
+      gap: 4px;
     }
   }
 {% endstylesheet %}
